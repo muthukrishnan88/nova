@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SAFNEX NOVA</string>
+    <string name="accessibility_service_description">SAFNEX NOVA detects links in WhatsApp, Instagram, Telegram, and other apps to check them for security threats before you open them. This service reads on-screen content to find URLs and does not collect or store any personal information.</string>
+</resources>
