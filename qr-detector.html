@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAFNEX NOVA | QR Intelligence</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#f4f7fc;--navy:#07152d;--blue:#356dff;--cyan:#27c7ff;
+--text:#101a2f;--muted:#71809a;--border:#dfe6f1;
+--white:#fff;--green:#13a673;--red:#e64d61;--orange:#ed9b28
+}
+html,body{width:100%;min-height:100%}
+body{
+font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);
+background:radial-gradient(circle at 80% 10%,rgba(53,109,255,.12),transparent 28%),
+linear-gradient(135deg,#f8faff,#eef3fb)
+}
+.header{
+height:70px;background:rgba(7,21,45,.97);display:flex;align-items:center;
+justify-content:space-between;padding:0 34px;color:#fff
+}
+.brand{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:800;letter-spacing:.8px}
+.brand span{color:#55cfff}
+.logo{width:42px;height:42px;border-radius:50%;overflow:hidden;background:#fff;
+display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.3)}
+.logo img{width:100%;height:100%;object-fit:cover}
+.header-label{font-size:11px;font-weight:700;letter-spacing:1.5px;color:#9eb2d5}
+.tabs{display:flex;gap:5px}
+.tab{padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);
+font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);transition:.2s}
+.tab.active{background:rgba(53,109,255,.9);color:#fff;border-color:transparent}
+.tab:hover{background:rgba(255,255,255,.12)}
+.main{min-height:calc(100vh - 70px);padding:28px 38px;display:flex;align-items:center;justify-content:center}
+.container{width:min(1180px,100%);min-height:650px;display:grid;grid-template-columns:42% 58%;gap:22px}
+.left{
+background:radial-gradient(circle at 20% 10%,rgba(39,199,255,.18),transparent 30%),
+linear-gradient(145deg,var(--navy),#102d58);border-radius:24px;padding:42px;color:#fff;
+display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;
+box-shadow:0 25px 60px rgba(7,21,45,.18)
+}
+.left:after{content:"";position:absolute;width:280px;height:280px;border:1px solid rgba(255,255,255,.08);
+border-radius:50%;right:-130px;bottom:-120px}
+.badge{display:inline-flex;width:max-content;padding:7px 12px;border-radius:30px;
+background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12);color:#8fdfff;
+font-size:10px;font-weight:800;letter-spacing:1.4px;margin-bottom:20px}
+.left h1{font-size:clamp(30px,3.3vw,49px);line-height:1.06;letter-spacing:-1.7px;margin-bottom:18px}
+.left h1 span{color:#53d2ff}
+.left p{color:#b9c9e3;line-height:1.65;font-size:14px;max-width:470px}
+.features{margin-top:30px;display:grid;gap:12px}
+.feature{display:flex;align-items:center;gap:11px;color:#dce7f7;font-size:13px}
+.feature-icon{width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.08);
+display:flex;align-items:center;justify-content:center;color:#55d4ff}
+.right{
+background:#fff;border:1px solid var(--border);border-radius:24px;
+box-shadow:0 25px 60px rgba(20,40,80,.09);padding:30px;display:flex;flex-direction:column;min-width:0
+}
+.scan-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.scan-title h2{font-size:22px;letter-spacing:-.5px}
+.status{font-size:10px;font-weight:800;color:#58708e;background:#f1f5fa;padding:7px 10px;border-radius:20px}
+.status.green{color:var(--green);background:#eaf9f2}
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:20px}
+.tab-content{display:none}
+.tab-content.active{display:flex;flex-direction:column;flex:1}
+.upload-area{
+position:relative;width:100%;min-height:145px;border:1.5px dashed #cbd7e8;border-radius:16px;
+background:#f9fbfe;display:flex;align-items:center;justify-content:center;text-align:center;
+cursor:pointer;transition:.2s ease;margin-bottom:18px
+}
+.upload-area:hover{border-color:var(--blue);background:#f5f8ff;transform:translateY(-1px)}
+.upload-area.dragover{border-color:var(--blue);background:#eef4ff;box-shadow:0 0 0 4px rgba(53,109,255,.08)}
+.upload-content{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.upload-icon,.empty-icon{width:52px;height:52px;border-radius:16px;background:#eaf1ff;color:var(--blue);
+display:flex;align-items:center;justify-content:center;font-size:24px}
+.upload-title{font-size:13px;font-weight:800}
+.upload-subtitle{font-size:10px;color:var(--muted)}
+#qrInput{display:none}
+.upload-btn,.action-btn{
+border:none;height:42px;padding:0 17px;border-radius:11px;background:linear-gradient(135deg,var(--blue),#4c8aff);
+color:#fff;font-size:10px;font-weight:900;letter-spacing:.7px;cursor:pointer;
+box-shadow:0 8px 18px rgba(53,109,255,.2);margin-top:5px
+}
+.preview{display:none;margin-bottom:18px}
+.preview.show{display:flex;align-items:center;gap:12px}
+.preview-image{width:58px;height:58px;border-radius:11px;object-fit:cover;border:1px solid var(--border)}
+.preview-info{min-width:0}
+.preview-name{font-size:11px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preview-size{font-size:9px;color:var(--muted);margin-top:4px}
+.empty{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted)}
+.empty-inner{max-width:420px}
+.empty-icon{margin:0 auto 13px}
+.empty h3{font-size:16px;margin-bottom:6px}
+.empty p,.not-qr p{font-size:12px;line-height:1.6}
+.results,.report-view{display:none;flex:1;min-height:0}
+.results.show,.report-view.show{display:flex;flex-direction:column}
+.qr-result{border:1px solid var(--border);border-radius:15px;background:#fafcff;padding:16px;margin-bottom:12px}
+.qr-result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.detected{display:flex;align-items:center;gap:8px;color:var(--green);font-size:10px;font-weight:900;letter-spacing:.6px}
+.detected-icon{width:25px;height:25px;border-radius:8px;background:#eaf9f2;display:flex;align-items:center;justify-content:center}
+.type-badge{font-size:9px;font-weight:900;color:var(--blue);background:#eaf1ff;padding:6px 9px;border-radius:8px}
+.content-label{font-size:9px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.content-value{color:var(--text);font-size:13px;line-height:1.5;word-break:break-word;background:#fff;
+border:1px solid var(--border);border-radius:10px;padding:10px 11px;max-height:105px;overflow:auto}
+.action-btn{width:100%;height:44px;margin:0 0 10px}
+.secondary-btn{width:100%;height:40px;border:1px solid var(--border);border-radius:10px;background:#fff;
+color:#52637c;font-size:10px;font-weight:800;cursor:pointer}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.info-card{border:1px solid var(--border);border-radius:11px;padding:10px;background:#fafcff}
+.info-title{font-size:8px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.info-value{font-size:11px;font-weight:750}
+.not-qr{display:none;flex:1;align-items:center;justify-content:center;text-align:center}
+.not-qr.show{display:flex}
+.not-qr-inner{max-width:400px}
+.not-qr-icon{width:65px;height:65px;border-radius:20px;background:#fff0f2;color:var(--red);
+display:flex;align-items:center;justify-content:center;font-size:27px;margin:0 auto 14px}
+.not-qr h3{font-size:17px;margin-bottom:7px}
+.scan-loading{display:none;flex:1;align-items:center;justify-content:center;text-align:center}
+.scan-loading.show{display:flex}
+.scanner{width:100px;height:100px;margin:0 auto 18px;border:2px solid #dce7f8;border-radius:22px;position:relative;overflow:hidden;background:#f8faff}
+.scanner:before,.scanner:after{content:"";position:absolute;width:17px;height:17px;border-color:var(--blue);border-style:solid}
+.scanner:before{top:12px;left:12px;border-width:3px 0 0 3px}
+.scanner:after{right:12px;bottom:12px;border-width:0 3px 3px 0}
+.scan-line{position:absolute;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+box-shadow:0 0 12px rgba(39,199,255,.7);animation:scanMove 1.5s ease-in-out infinite}
+@keyframes scanMove{0%{top:10px}50%{top:88px}100%{top:10px}}
+.loading-title{font-size:16px;font-weight:850;margin-bottom:6px}.loading-text{font-size:11px;color:var(--muted)}
+.tech{margin-top:10px}.tech summary{cursor:pointer;font-size:10px;font-weight:800;color:#65748c;padding:8px 0}
+.tech-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:100px;overflow:auto}
+.tech-item{background:#f5f7fa;border-radius:7px;padding:6px 8px;font-size:9px;color:#67758a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tech-item strong{color:#25334a}
+.form-group{margin-bottom:15px}
+.form-label{display:block;font-size:11px;font-weight:700;color:#344054;margin-bottom:6px}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit}
+.form-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(53,109,255,.1)}
+.qr-output{margin-top:15px;text-align:center;padding:20px;background:#fafcff;border:1px solid var(--border);border-radius:15px}
+#qrCanvas{margin:0 auto 15px;display:block;max-width:100%}
+.type-section{display:flex;align-items:center;gap:14px;padding:15px;border:1px solid var(--border);
+background:#fafcff;border-radius:14px;margin-bottom:14px}
+.type-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+background:#eaf1ff;color:var(--blue);font-size:21px;flex-shrink:0}
+.type-small{color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;margin-bottom:4px}
+.type-name{color:var(--text);font-size:17px;font-weight:850}
+.section-title{font-size:9px;color:var(--muted);font-weight:900;letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px}
+.content-box{background:#fff;border:1px solid var(--border);border-radius:13px;padding:14px;font-size:13px;
+line-height:1.6;color:var(--text);white-space:pre-wrap;word-break:break-word;max-height:210px;overflow:auto;margin-bottom:14px}
+.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.detail{background:#fafcff;border:1px solid var(--border);border-radius:11px;padding:11px}
+.detail-label{font-size:8px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.5px;margin-bottom:4px}
+.detail-value{font-size:11px;font-weight:800;color:var(--text);word-break:break-word}
+.notice{padding:12px 13px;border-radius:11px;background:#f5f8ff;border:1px solid #dce7ff;color:#536681;
+font-size:10px;line-height:1.55;margin-bottom:14px}
+.notice strong{color:var(--blue)}
+.button{width:100%;height:44px;border:none;border-radius:11px;background:linear-gradient(135deg,var(--blue),#4c8aff);
+color:#fff;font-size:10px;font-weight:900;letter-spacing:.7px;cursor:pointer;margin-bottom:9px;
+box-shadow:0 8px 18px rgba(53,109,255,.2)}
+@media(min-width:851px){
+html{scroll-behavior:smooth}
+body{overflow-x:hidden;overflow-y:auto}
+.right{max-height:calc(100vh - 170px);overflow-y:auto}
+.right::-webkit-scrollbar{width:7px}
+.right::-webkit-scrollbar-track{background:#f1f3f7;border-radius:10px}
+.right::-webkit-scrollbar-thumb{background:#c4cad9;border-radius:10px}
+.right::-webkit-scrollbar-thumb:hover{background:#a8b0c3}
+}
+@media(max-width:850px){
+.header{height:62px;padding:0 17px}.brand{font-size:16px}.logo{width:36px;height:36px}.header-label{display:none}
+.main{min-height:calc(100vh - 62px);padding:14px}.container{min-height:0;grid-template-columns:1fr}
+.left{min-height:260px;padding:28px;border-radius:20px}.left h1{font-size:34px}.features{display:none}
+.right{min-height:560px;border-radius:20px;padding:20px}.upload-area{min-height:150px}.info-grid{grid-template-columns:1fr}
+.tabs{gap:3px}.tab{font-size:10px;padding:6px 12px}
+}
+@media(max-width:390px){.left{min-height:230px;padding:22px}.left h1{font-size:30px}.right{padding:17px}}
+</style>
+</head>
+
+<body>
+<header class="header">
+<div class="brand">
+<div class="logo"><img src="logo.jpeg" alt="SAFNEX NOVA"></div>
+SAFNEX <span>NOVA</span>
+</div>
+<div class="tabs">
+<div class="tab active" data-tab="scan">SCAN QR</div>
+<div class="tab" data-tab="generate">GENERATE QR</div>
+</div>
+</header>
+
+<main class="main">
+<div class="container">
+
+<section class="left">
+<div class="badge">SAFNEX NOVA QR INTELLIGENCE</div>
+<h1 id="leftTitle">Scan & Analyze <span>QR codes.</span></h1>
+<p id="leftDesc">Upload a QR code image to analyze its content, or generate new QR codes for URLs, text, contacts, WiFi, and payments.</p>
+<div class="features">
+<div class="feature"><div class="feature-icon">✓</div><span id="feat1">QR content detection</span></div>
+<div class="feature"><div class="feature-icon">◎</div><span id="feat2">Content type identification</span></div>
+<div class="feature"><div class="feature-icon">◆</div><span id="feat3">Safe content preview</span></div>
+<div class="feature"><div class="feature-icon">⚡</div><span id="feat4">Smart action detection</span></div>
+</div>
+</section>
+
+<section class="right">
+<!-- SCAN TAB -->
+<div class="tab-content active" id="scanTab">
+<div class="scan-title">
+<h2>Analyze a QR code</h2>
+<div class="status">QR SCAN</div>
+</div>
+<p class="subtitle">Upload an image containing a QR code.</p>
+
+<label class="upload-area" id="uploadArea" for="qrInput">
+<div class="upload-content">
+<div class="upload-icon">▣</div>
+<div class="upload-title">Upload QR Code</div>
+<div class="upload-subtitle">JPG • PNG • WEBP</div>
+<button type="button" class="upload-btn" id="uploadButton">CHOOSE IMAGE</button>
+</div>
+<input id="qrInput" type="file" accept="image/png,image/jpeg,image/webp">
+</label>
+
+<div id="preview" class="preview">
+<img id="previewImage" class="preview-image" alt="Uploaded QR image">
+<div class="preview-info">
+<div id="previewName" class="preview-name">-</div>
+<div id="previewSize" class="preview-size">-</div>
+</div>
+</div>
+
+<div id="scanLoading" class="scan-loading">
+<div class="loading-inner">
+<div class="scanner"><div class="scan-line"></div></div>
+<div class="loading-title">Reading QR code</div>
+<div class="loading-text">SAFNEX NOVA is checking the uploaded image.</div>
+</div>
+</div>
+
+<div id="empty" class="empty">
+<div class="empty-inner">
+<div class="empty-icon">▣</div>
+<h3>Ready to analyze</h3>
+<p>Upload a QR code image. SAFNEX NOVA will detect and identify what it contains.</p>
+</div>
+</div>
+
+<div id="notQr" class="not-qr">
+<div class="not-qr-inner">
+<div class="not-qr-icon">×</div>
+<h3>No QR code detected</h3>
+<p>This image does not appear to contain a readable QR code. Try uploading a clearer image.</p>
+<br>
+<button class="secondary-btn" id="tryAgainBtn">TRY ANOTHER IMAGE</button>
+</div>
+</div>
+
+<div id="results" class="results">
+<div class="qr-result">
+<div class="qr-result-head">
+<div class="detected"><div class="detected-icon">✓</div>QR CODE DETECTED</div>
+<div id="typeBadge" class="type-badge">UNKNOWN</div>
+</div>
+<div class="content-label">DETECTED CONTENT</div>
+<div id="contentValue" class="content-value">-</div>
+</div>
+
+<button id="viewFullBtn" class="action-btn">VIEW FULL REPORT →</button>
+<button id="copyBtn" class="secondary-btn">COPY CONTENT</button>
+
+<div class="info-grid">
+<div class="info-card">
+<div class="info-title">QR Type</div>
+<div id="infoType" class="info-value">-</div>
+</div>
+<div class="info-card">
+<div class="info-title">Status</div>
+<div id="infoStatus" class="info-value">Detected</div>
+</div>
+</div>
+
+<details class="tech">
+<summary>TECHNICAL DETAILS</summary>
+<div class="tech-grid">
+<div class="tech-item"><strong>Format:</strong> <span>QR Code</span></div>
+<div class="tech-item"><strong>Type:</strong> <span id="techType">-</span></div>
+<div class="tech-item"><strong>Image:</strong> <span id="techImage">-</span></div>
+<div class="tech-item"><strong>Decoded:</strong> <span>Yes</span></div>
+</div>
+</details>
+</div>
+
+<!-- FULL REPORT VIEW -->
+<div id="reportView" class="report-view">
+<div class="scan-title">
+<h2>QR Content Details</h2>
+<div class="status green">✓ DETECTED</div>
+</div>
+
+<div class="type-section">
+<div id="reportTypeIcon" class="type-icon">▣</div>
+<div>
+<div class="type-small">WHAT IS THIS?</div>
+<div id="reportTypeName" class="type-name">-</div>
+</div>
+</div>
+
+<div class="section-title">WHAT DOES IT CONTAIN?</div>
+<div id="reportContentBox" class="content-box">-</div>
+
+<div class="details-grid">
+<div class="detail">
+<div class="detail-label">Detection</div>
+<div class="detail-value">QR Code</div>
+</div>
+<div class="detail">
+<div class="detail-label">Status</div>
+<div id="reportStatus" class="detail-value">Successfully decoded</div>
+</div>
+<div class="detail">
+<div class="detail-label">Data Type</div>
+<div id="reportDataType" class="detail-value">-</div>
+</div>
+<div class="detail">
+<div class="detail-label">Security Action</div>
+<div id="reportSecurityAction" class="detail-value">Review content</div>
+</div>
+</div>
+
+<div id="reportNotice" class="notice">
+<strong>SAFNEX NOVA:</strong> Review decoded information before opening links or taking external actions.
+</div>
+
+<button id="reportPrimaryBtn" class="button">-</button>
+<button id="reportCopyBtn" class="secondary-btn">COPY CONTENT</button>
+<br>
+<button id="backToScanBtn" class="secondary-btn">← BACK TO QR SCAN</button>
+</div>
+
+</div>
+
+<!-- GENERATE TAB -->
+<div class="tab-content" id="generateTab">
+<div class="scan-title">
+<h2>Generate QR Code</h2>
+<div class="status">QR CREATE</div>
+</div>
+<p class="subtitle">Create QR codes for any content.</p>
+
+<div class="form-group">
+<label class="form-label" for="qrTypeSelect">QR Code Type</label>
+<select id="qrTypeSelect" class="form-input">
+<option value="text">Text</option>
+<option value="url" selected>URL / Website</option>
+<option value="email">Email</option>
+<option value="phone">Phone</option>
+<option value="sms">SMS</option>
+<option value="wifi">WiFi</option>
+<option value="upi">UPI Payment</option>
+</select>
+</div>
+
+<div class="form-group">
+<label class="form-label" for="qrContent">Content</label>
+<input type="text" id="qrContent" class="form-input" placeholder="Enter content for QR code">
+</div>
+
+<button class="action-btn" id="generateBtn">GENERATE QR CODE</button>
+
+<div id="qrOutput" class="qr-output" style="display:none">
+<canvas id="qrCanvas"></canvas>
+<button class="secondary-btn" id="downloadQrBtn">DOWNLOAD QR CODE</button>
+</div>
+</div>
+
+</section>
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+"use strict";
+
+// Tab switching
+const tabs=document.querySelectorAll('.tab');
+const scanTab=document.getElementById('scanTab');
+const generateTab=document.getElementById('generateTab');
+const leftTitle=document.getElementById('leftTitle');
+const leftDesc=document.getElementById('leftDesc');
+const feat1=document.getElementById('feat1');
+const feat2=document.getElementById('feat2');
+const feat3=document.getElementById('feat3');
+const feat4=document.getElementById('feat4');
+
+tabs.forEach(tab=>{
+tab.addEventListener('click',()=>{
+tabs.forEach(t=>t.classList.remove('active'));
+tab.classList.add('active');
+
+const tabType=tab.dataset.tab;
+if(tabType==='scan'){
+scanTab.classList.add('active');
+generateTab.classList.remove('active');
+leftTitle.innerHTML='Scan & Analyze <span>QR codes.</span>';
+leftDesc.textContent='Upload a QR code image to analyze its content, or generate new QR codes.';
+feat1.textContent='QR content detection';
+feat2.textContent='Content type identification';
+feat3.textContent='Safe content preview';
+feat4.textContent='Smart action detection';
+}else{
+scanTab.classList.remove('active');
+generateTab.classList.add('active');
+leftTitle.innerHTML='Generate <span>QR codes.</span>';
+leftDesc.textContent='Create QR codes for URLs, text, contacts, WiFi networks, and UPI payments instantly.';
+feat1.textContent='Multiple content types';
+feat2.textContent='High-quality QR codes';
+feat3.textContent='Instant generation';
+feat4.textContent='Download as PNG';
+}
+});
+});
+
+// SCAN FUNCTIONALITY
+const qrInput=document.getElementById("qrInput");
+const uploadArea=document.getElementById("uploadArea");
+const uploadButton=document.getElementById("uploadButton");
+const preview=document.getElementById("preview");
+const previewImage=document.getElementById("previewImage");
+const previewName=document.getElementById("previewName");
+const previewSize=document.getElementById("previewSize");
+const empty=document.getElementById("empty");
+const results=document.getElementById("results");
+const notQr=document.getElementById("notQr");
+const scanLoading=document.getElementById("scanLoading");
+const tryAgainBtn=document.getElementById("tryAgainBtn");
+const typeBadge=document.getElementById("typeBadge");
+const contentValue=document.getElementById("contentValue");
+const viewFullBtn=document.getElementById("viewFullBtn");
+const copyBtn=document.getElementById("copyBtn");
+const infoType=document.getElementById("infoType");
+const infoStatus=document.getElementById("infoStatus");
+const techImage=document.getElementById("techImage");
+const techType=document.getElementById("techType");
+
+const reportView=document.getElementById("reportView");
+const reportTypeIcon=document.getElementById("reportTypeIcon");
+const reportTypeName=document.getElementById("reportTypeName");
+const reportContentBox=document.getElementById("reportContentBox");
+const reportDataType=document.getElementById("reportDataType");
+const reportSecurityAction=document.getElementById("reportSecurityAction");
+const reportNotice=document.getElementById("reportNotice");
+const reportPrimaryBtn=document.getElementById("reportPrimaryBtn");
+const reportCopyBtn=document.getElementById("reportCopyBtn");
+const backToScanBtn=document.getElementById("backToScanBtn");
+
+let decodedContent="";
+let detectedType="";
+let currentObjectUrl=null;
+
+uploadButton.addEventListener("click",e=>{
+e.preventDefault();e.stopPropagation();qrInput.click();
+});
+
+qrInput.addEventListener("change",()=>{
+const file=qrInput.files&&qrInput.files[0];
+if(file) processImage(file);
+});
+
+uploadArea.addEventListener("dragover",e=>{
+e.preventDefault();uploadArea.classList.add("dragover");
+});
+
+uploadArea.addEventListener("dragleave",()=>{
+uploadArea.classList.remove("dragover");
+});
+
+uploadArea.addEventListener("drop",e=>{
+e.preventDefault();
+uploadArea.classList.remove("dragover");
+const file=e.dataTransfer.files&&e.dataTransfer.files[0];
+if(file) processImage(file);
+});
+
+function processImage(file){
+resetState();
+
+if(!file.type||!file.type.startsWith("image/")){
+showNotQR();
+return;
+}
+
+if(file.size>10*1024*1024){
+alert("Image is too large. Please upload an image below 10 MB.");
+return;
+}
+
+preview.classList.add("show");
+previewName.textContent=file.name;
+previewSize.textContent=formatFileSize(file.size);
+
+if(currentObjectUrl&&currentObjectUrl.startsWith("blob:")){
+URL.revokeObjectURL(currentObjectUrl);
+}
+
+currentObjectUrl=URL.createObjectURL(file);
+previewImage.src=currentObjectUrl;
+empty.style.display="none";
+scanLoading.classList.add("show");
+
+setTimeout(()=>decodeQR(currentObjectUrl,file.name),300);
+}
+
+function decodeQR(imageSource,fileName){
+if(!window.jsQR){
+scanLoading.classList.remove("show");
+showDecoderError();
+return;
+}
+
+const image=new Image();
+
+image.onload=()=>{
+try{
+const canvas=document.createElement("canvas");
+const context=canvas.getContext("2d",{willReadFrequently:true});
+if(!context){scanLoading.classList.remove("show");showNotQR();return;}
+
+const maxSize=1800;
+let width=image.naturalWidth;
+let height=image.naturalHeight;
+
+if(width>maxSize||height>maxSize){
+const scale=Math.min(maxSize/width,maxSize/height);
+width=Math.round(width*scale);
+height=Math.round(height*scale);
+}
+
+canvas.width=width;
+canvas.height=height;
+context.drawImage(image,0,0,width,height);
+
+const imageData=context.getImageData(0,0,width,height);
+const code=window.jsQR(
+imageData.data,imageData.width,imageData.height,
+{inversionAttempts:"attemptBoth"}
+);
+
+scanLoading.classList.remove("show");
+
+if(!code||!String(code.data||"").trim()){
+showNotQR();
+return;
+}
+
+decodedContent=String(code.data).trim();
+detectedType=detectQRType(decodedContent);
+showResult(decodedContent,detectedType,fileName);
+
+}catch(error){
+console.error("QR decode error:",error);
+scanLoading.classList.remove("show");
+showNotQR();
+}
+};
+
+image.onerror=()=>{
+scanLoading.classList.remove("show");
+showNotQR();
+};
+
+image.src=imageSource;
+}
+
+function detectQRType(data){
+const value=String(data||"").trim();
+
+if(/^https?:\/\/\S+/i.test(value))return"URL";
+if(/^tel:/i.test(value)||/^\+?[0-9][0-9\s().-]{6,}$/.test(value))return"PHONE";
+if(/^mailto:/i.test(value)||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))return"EMAIL";
+if(/^geo:/i.test(value))return"LOCATION";
+if(/^BEGIN:VCARD/i.test(value))return"CONTACT";
+if(/^WIFI:/i.test(value))return"WIFI";
+if(/^upi:/i.test(value)||/^upi:\/\/pay/i.test(value)||/(?:^|[?&])(pa|pn|am|mc)=/i.test(value))return"UPI / PAYMENT";
+if(/^sms:/i.test(value)||/^SMSTO:/i.test(value))return"SMS";
+if(value.length>0)return"TEXT";
+return"UNKNOWN";
+}
+
+function showResult(data,type,fileName){
+empty.style.display="none";
+notQr.classList.remove("show");
+results.classList.add("show");
+
+typeBadge.textContent=type;
+contentValue.textContent=data;
+infoType.textContent=type;
+infoStatus.textContent="QR CODE DETECTED";
+techType.textContent=type;
+techImage.textContent=fileName||"QR image";
+}
+
+viewFullBtn.addEventListener("click",()=>{
+results.classList.remove("show");
+reportView.classList.add("show");
+populateFullReport(decodedContent,detectedType);
+});
+
+function populateFullReport(data,type){
+reportTypeName.textContent=getFriendlyType(type);
+reportContentBox.textContent=data||"No decoded content.";
+reportDataType.textContent=type;
+
+const icons={
+"URL":"🔗","PHONE":"📞","EMAIL":"✉","LOCATION":"📍",
+"CONTACT":"👤","WIFI":"📶","UPI / PAYMENT":"💳","SMS":"💬",
+"TEXT":"📝","UNKNOWN":"▣"
+};
+reportTypeIcon.textContent=icons[type]||"▣";
+
+if(type==="URL"){
+const url=data.toLowerCase();
+const imageExts=['.jpg','.jpeg','.png','.gif','.webp','.bmp','.svg','.ico'];
+const audioExts=['.mp3','.wav','.m4a','.aac','.ogg','.webm','.wma','.mpeg','.mpga','.opus','.flac'];
+const videoExts=['.mp4','.mov','.avi','.mkv','.webm','.flv','.wmv','.m4v'];
+
+if(imageExts.some(ext=>url.includes(ext))){
+reportPrimaryBtn.textContent="ANALYZE IMAGE →";
+reportSecurityAction.textContent="Check for AI-generated";
+reportNotice.innerHTML="<strong>Image URL detected:</strong> SAFNEX NOVA will download and analyze this image for AI-generated content.";
+reportPrimaryBtn.onclick=()=>{
+window.location.href="image-detector.html?url="+encodeURIComponent(data);
+};
+}else if(audioExts.some(ext=>url.includes(ext))){
+reportPrimaryBtn.textContent="ANALYZE AUDIO →";
+reportSecurityAction.textContent="Check for deepfake";
+reportNotice.innerHTML="<strong>Audio URL detected:</strong> SAFNEX NOVA will download and analyze this audio for AI-generated/deepfake content.";
+reportPrimaryBtn.onclick=()=>{
+window.location.href="voice-detector.html?url="+encodeURIComponent(data);
+};
+}else if(videoExts.some(ext=>url.includes(ext))){
+reportPrimaryBtn.textContent="ANALYZE VIDEO →";
+reportSecurityAction.textContent="Check for AI-generated";
+reportNotice.innerHTML="<strong>Video URL detected:</strong> SAFNEX NOVA will download and analyze this video for AI-generated content.";
+reportPrimaryBtn.onclick=()=>{
+window.location.href="video-detector.html?url="+encodeURIComponent(data);
+};
+}else{
+reportPrimaryBtn.textContent="ANALYZE LINK →";
+reportSecurityAction.textContent="Analyze before opening";
+reportNotice.innerHTML="<strong>Link detected:</strong> The QR contains a website address. SAFNEX NOVA can send it to the Link Detector before you open the website.";
+reportPrimaryBtn.onclick=()=>{
+window.location.href="link-detector.html?url="+encodeURIComponent(data);
+};
+}
+}else if(type==="PHONE"){
+reportPrimaryBtn.textContent="CHECK PHONE NUMBER →";
+reportSecurityAction.textContent="Verify phone information";
+reportPrimaryBtn.onclick=()=>{
+const phone=data.replace(/^tel:/i,'');
+window.location.href="phonenumber-detector.html?phone="+encodeURIComponent(phone);
+};
+}else if(type==="EMAIL"){
+reportPrimaryBtn.textContent="OPEN EMAIL APP →";
+reportSecurityAction.textContent="Review email first";
+reportNotice.innerHTML="<strong>Email detected:</strong> Review the address carefully before sending or opening any email-related content.";
+reportPrimaryBtn.onclick=()=>{
+const email=data.replace(/^mailto:/i,'');
+window.location.href="mailto:"+email;
+};
+}else if(type==="LOCATION"){
+reportPrimaryBtn.textContent="VIEW LOCATION →";
+reportSecurityAction.textContent="Review location";
+reportPrimaryBtn.onclick=()=>{
+window.open(data,"_blank","noopener,noreferrer");
+};
+}else if(type==="CONTACT"){
+reportPrimaryBtn.textContent="VIEW CONTACT DATA";
+reportSecurityAction.textContent="Review contact details";
+reportPrimaryBtn.onclick=()=>{
+reportContentBox.scrollIntoView({behavior:"smooth"});
+};
+}else if(type==="WIFI"){
+reportPrimaryBtn.textContent="VIEW WI-FI DATA";
+reportSecurityAction.textContent="Sensitive configuration";
+reportNotice.innerHTML="<strong>Sensitive information detected:</strong> This QR may contain Wi-Fi network configuration. SAFNEX NOVA will not automatically connect to the network.";
+reportPrimaryBtn.onclick=()=>{
+reportContentBox.scrollIntoView({behavior:"smooth"});
+};
+}else if(type==="UPI / PAYMENT"){
+reportPrimaryBtn.textContent="VIEW PAYMENT DATA";
+reportSecurityAction.textContent="Review payment details";
+reportNotice.innerHTML="<strong>Payment QR detected:</strong> Review the payment address, recipient and amount carefully before making any payment.";
+reportPrimaryBtn.onclick=()=>{
+reportContentBox.scrollIntoView({behavior:"smooth"});
+};
+}else if(type==="SMS"){
+reportPrimaryBtn.textContent="VIEW SMS CONTENT";
+reportSecurityAction.textContent="Review message";
+reportPrimaryBtn.onclick=()=>{
+reportContentBox.scrollIntoView({behavior:"smooth"});
+};
+}else{
+reportPrimaryBtn.textContent="VIEW CONTENT";
+reportSecurityAction.textContent="No website score";
+reportNotice.innerHTML="<strong>Plain content:</strong> This QR does not contain a website link. SAFNEX NOVA displays the decoded information without assigning a website security score.";
+reportPrimaryBtn.onclick=()=>{
+reportContentBox.scrollIntoView({behavior:"smooth"});
+};
+}
+}
+
+function getFriendlyType(type){
+const names={
+"URL":"Website / URL","PHONE":"Phone Number","EMAIL":"Email Address",
+"LOCATION":"Location","CONTACT":"Contact / vCard","WIFI":"Wi-Fi Configuration",
+"UPI / PAYMENT":"Payment / UPI QR","SMS":"SMS Message","TEXT":"Plain Text",
+"UNKNOWN":"Unknown QR Data"
+};
+return names[type]||"Unknown QR Data";
+}
+
+copyBtn.addEventListener("click",async()=>{
+if(!decodedContent)return;
+try{
+await navigator.clipboard.writeText(decodedContent);
+const old=copyBtn.textContent;
+copyBtn.textContent="COPIED ✓";
+setTimeout(()=>copyBtn.textContent=old,1400);
+}catch(error){
+alert("Unable to copy content.");
+}
+});
+
+reportCopyBtn.addEventListener("click",async()=>{
+if(!decodedContent)return;
+try{
+await navigator.clipboard.writeText(decodedContent);
+const old=reportCopyBtn.textContent;
+reportCopyBtn.textContent="COPIED ✓";
+setTimeout(()=>reportCopyBtn.textContent=old,1400);
+}catch(error){
+alert("Unable to copy content.");
+}
+});
+
+backToScanBtn.addEventListener("click",()=>{
+reportView.classList.remove("show");
+results.classList.add("show");
+});
+
+function showNotQR(){
+empty.style.display="none";
+results.classList.remove("show");
+scanLoading.classList.remove("show");
+notQr.classList.add("show");
+}
+
+function showDecoderError(){
+empty.style.display="none";
+results.classList.remove("show");
+notQr.classList.add("show");
+notQr.querySelector("h3").textContent="QR decoder unavailable";
+notQr.querySelector("p").textContent=
+"The QR decoding library could not be loaded. Check your internet connection and try again.";
+}
+
+tryAgainBtn.addEventListener("click",()=>{
+resetState();
+qrInput.value="";
+empty.style.display="flex";
+});
+
+function resetState(){
+results.classList.remove("show");
+reportView.classList.remove("show");
+notQr.classList.remove("show");
+scanLoading.classList.remove("show");
+preview.classList.remove("show");
+decodedContent="";
+detectedType="";
+notQr.querySelector("h3").textContent="No QR code detected";
+notQr.querySelector("p").textContent=
+"This image does not appear to contain a readable QR code. Try uploading a clearer image.";
+}
+
+function formatFileSize(bytes){
+if(!Number.isFinite(bytes)||bytes<=0)return"Unknown size";
+const units=["B","KB","MB","GB"];
+let index=0,size=bytes;
+while(size>=1024&&index<units.length-1){
+size/=1024;index++;
+}
+return size.toFixed(size>=10||index===0?0:1)+" "+units[index];
+}
+
+// GENERATE FUNCTIONALITY
+const qrTypeSelect=document.getElementById('qrTypeSelect');
+const qrContent=document.getElementById('qrContent');
+const generateBtn=document.getElementById('generateBtn');
+const qrOutput=document.getElementById('qrOutput');
+const qrCanvas=document.getElementById('qrCanvas');
+const downloadQrBtn=document.getElementById('downloadQrBtn');
+
+qrTypeSelect.addEventListener('change',()=>{
+const type=qrTypeSelect.value;
+if(type==='url')qrContent.placeholder='https://example.com';
+else if(type==='email')qrContent.placeholder='email@example.com';
+else if(type==='phone')qrContent.placeholder='+1234567890';
+else if(type==='sms')qrContent.placeholder='+1234567890';
+else if(type==='wifi')qrContent.placeholder='WIFI:T:WPA;S:NetworkName;P:password;;';
+else if(type==='upi')qrContent.placeholder='upi://pay?pa=example@upi&pn=Name&am=100';
+else qrContent.placeholder='Enter text content';
+qrOutput.style.display='none';
+});
+
+generateBtn.addEventListener('click',async()=>{
+const content=qrContent.value.trim();
+if(!content){
+alert('Enter content for QR code.');
+return;
+}
+
+const type=qrTypeSelect.value;
+let finalContent=content;
+
+if(type==='email'&&!/^mailto:/i.test(content))finalContent='mailto:'+content;
+else if(type==='phone'&&!/^tel:/i.test(content))finalContent='tel:'+content;
+else if(type==='sms'&&!/^sms:/i.test(content))finalContent='sms:'+content;
+
+if(!window.QRCode){
+alert('QR code generator library not loaded. Check internet connection.');
+return;
+}
+
+try{
+generateBtn.disabled=true;
+generateBtn.textContent='GENERATING...';
+
+await window.QRCode.toCanvas(qrCanvas,finalContent,{
+width:280,
+margin:2,
+color:{dark:'#07152d',light:'#ffffff'}
+});
+
+qrOutput.style.display='block';
+generateBtn.textContent='GENERATE QR CODE';
+generateBtn.disabled=false;
+}catch(error){
+console.error('QR generation error:',error);
+alert('Failed to generate QR code.');
+generateBtn.textContent='GENERATE QR CODE';
+generateBtn.disabled=false;
+}
+});
+
+downloadQrBtn.addEventListener('click',()=>{
+try{
+const dataUrl=qrCanvas.toDataURL('image/png');
+const link=document.createElement('a');
+link.download='safnex-qr-code.png';
+link.href=dataUrl;
+link.click();
+}catch(error){
+alert('Failed to download QR code.');
+}
+});
+
+// AUTO-LOAD FROM HOME.HTML VIA SESSIONSTORAGE
+(function(){
+try{
+const stored=sessionStorage.getItem("safnexQrResult");
+if(!stored)return;
+sessionStorage.removeItem("safnexQrResult");
+
+const qrData=JSON.parse(stored);
+if(!qrData||!qrData.data)return;
+
+// Switch to scan tab
+tabs.forEach(t=>t.classList.remove('active'));
+tabs[0].classList.add('active');
+scanTab.classList.add('active');
+generateTab.classList.remove('active');
+
+// Set preview if image available
+if(qrData.image){
+preview.classList.add("show");
+previewImage.src=qrData.image;
+previewName.textContent="QR Code from Home";
+previewSize.textContent="Analyzed";
+}
+
+// Show results immediately
+decodedContent=qrData.data;
+detectedType=detectQRType(qrData.data);
+showResult(qrData.data,detectedType,"QR from Home");
+
+// Auto-open full report view
+setTimeout(()=>{
+results.classList.remove("show");
+reportView.classList.add("show");
+populateFullReport(qrData.data,detectedType);
+},100);
+
+}catch(e){
+console.warn("QR auto-load failed:",e);
+}
+})();
+</script>
+</body>
+</html>
