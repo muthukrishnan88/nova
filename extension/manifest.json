@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "SAFNEX NOVA Link Guard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Protect yourself from suspicious links with AI-powered link analysis",
   "permissions": [
     "activeTab",
-    "storage",
-    "webNavigation"
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -19,7 +18,8 @@
       "matches": ["<all_urls>"],
       "js": ["content.js"],
       "css": ["popup.css"],
-      "run_at": "document_end"
+      "run_at": "document_end",
+      "all_frames": false
     }
   ],
   "action": {

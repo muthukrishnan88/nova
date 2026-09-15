@@ -1,10 +1,11 @@
-// SAFNEX NOVA Extension - Content Script
+// SAFNEX NOVA Extension - Content Script with Debug Logging
+
+console.log('🛡️ SAFNEX: Content script loaded');
 
 let isCheckingLink = false;
 
 // Intercept all link clicks
 document.addEventListener('click', function(e) {
-  // Find closest anchor tag
   const link = e.target.closest('a');
 
   if (!link || !link.href) return;
@@ -26,114 +27,91 @@ document.addEventListener('click', function(e) {
     return;
   }
 
+  console.log('🛡️ SAFNEX: External link clicked:', link.href);
+
   // Prevent default navigation
   e.preventDefault();
   e.stopPropagation();
 
-  // Check link safety
+  // Show popup immediately
   if (!isCheckingLink) {
-    checkLinkBeforeNavigate(link.href);
+    showSafnexPopup(link.href);
   }
 }, true);
 
-async function checkLinkBeforeNavigate(url) {
-  isCheckingLink = true;
+function showSafnexPopup(url) {
+  console.log('🛡️ SAFNEX: Creating popup for:', url);
 
-  // Show loading overlay
-  showSafnexPopup(url, { loading: true });
-
-  try {
-    // Send to background script for API check
-    const response = await new Promise((resolve) => {
-      chrome.runtime.sendMessage(
-        { action: "checkLink", url },
-        resolve
-      );
-    });
-
-    if (response.success) {
-      showSafnexPopup(url, response.result);
-    } else {
-      showSafnexPopup(url, { error: true });
-    }
-  } catch (error) {
-    console.error("SAFNEX check failed:", error);
-    showSafnexPopup(url, { error: true });
-  }
-
-  isCheckingLink = false;
-}
-
-function showSafnexPopup(url, result) {
   // Remove existing popup
   const existing = document.getElementById('safnex-popup-overlay');
-  if (existing) existing.remove();
+  if (existing) {
+    console.log('🛡️ SAFNEX: Removing existing popup');
+    existing.remove();
+  }
 
   // Create overlay
   const overlay = document.createElement('div');
   overlay.id = 'safnex-popup-overlay';
   overlay.className = 'safnex-overlay';
 
-  let content = '';
-
-  if (result.loading) {
-    content = `
-      <div class="safnex-popup">
-        <div class="safnex-header">
-          <div class="safnex-logo">🛡️ SAFNEX NOVA</div>
-        </div>
-        <div class="safnex-body">
-          <div class="safnex-spinner"></div>
-          <h3>Verifying Link...</h3>
-          <p class="safnex-url">${escapeHtml(url)}</p>
+  overlay.innerHTML = `
+    <div class="safnex-popup">
+      <div class="safnex-header">
+        <div class="safnex-logo">🛡️ SAFNEX NOVA</div>
+        <button class="safnex-close" id="safnex-close-btn">✕</button>
+      </div>
+      <div class="safnex-body">
+        <div class="safnex-icon-simple">🔒</div>
+        <h3>Link Protection</h3>
+        <p class="safnex-url">${escapeHtml(url)}</p>
+        <div class="safnex-actions">
+          <button class="safnex-btn safnex-btn-secondary" id="safnex-check-btn">Check Website</button>
+          <button class="safnex-btn safnex-btn-primary" id="safnex-open-btn">Open Directly</button>
         </div>
       </div>
-    `;
-  } else {
-    // Simple professional popup - no risk scores
-    content = `
-      <div class="safnex-popup">
-        <div class="safnex-header">
-          <div class="safnex-logo">🛡️ SAFNEX NOVA</div>
-          <button class="safnex-close">✕</button>
-        </div>
-        <div class="safnex-body">
-          <div class="safnex-icon-simple">🔒</div>
-          <h3>Link Protection</h3>
-          <p class="safnex-url">${escapeHtml(url)}</p>
-          <div class="safnex-actions">
-            <button class="safnex-btn safnex-btn-secondary" data-action="check" data-url="${url}">Check Website</button>
-            <button class="safnex-btn safnex-btn-primary" data-action="open" data-url="${url}">Open Directly</button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
+    </div>
+  `;
 
-  overlay.innerHTML = content;
   document.body.appendChild(overlay);
+  console.log('🛡️ SAFNEX: Popup added to DOM');
 
-  // Attach event listeners (CSP-compliant)
-  const closeBtn = overlay.querySelector('.safnex-close');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => overlay.remove());
-  }
+  // Attach event listeners with debug logging
+  setTimeout(() => {
+    const closeBtn = document.getElementById('safnex-close-btn');
+    const checkBtn = document.getElementById('safnex-check-btn');
+    const openBtn = document.getElementById('safnex-open-btn');
 
-  const checkBtn = overlay.querySelector('[data-action="check"]');
-  if (checkBtn) {
-    const targetUrl = checkBtn.getAttribute('data-url');
-    checkBtn.addEventListener('click', () => {
-      window.open(`https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(targetUrl)}`, '_blank');
-    });
-  }
+    console.log('🛡️ SAFNEX: Attaching event listeners');
+    console.log('  Close button:', closeBtn ? '✓ Found' : '✗ Not found');
+    console.log('  Check button:', checkBtn ? '✓ Found' : '✗ Not found');
+    console.log('  Open button:', openBtn ? '✓ Found' : '✗ Not found');
 
-  const openBtn = overlay.querySelector('[data-action="open"]');
-  if (openBtn) {
-    const targetUrl = openBtn.getAttribute('data-url');
-    openBtn.addEventListener('click', () => {
-      window.location.href = targetUrl;
-    });
-  }
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        console.log('🛡️ SAFNEX: Close button clicked');
+        overlay.remove();
+      });
+    }
+
+    if (checkBtn) {
+      checkBtn.addEventListener('click', function() {
+        console.log('🛡️ SAFNEX: Check Website button clicked');
+        const analyzeUrl = `https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(url)}`;
+        console.log('  Opening:', analyzeUrl);
+        window.open(analyzeUrl, '_blank');
+      });
+    }
+
+    if (openBtn) {
+      openBtn.addEventListener('click', function() {
+        console.log('🛡️ SAFNEX: Open Directly button clicked');
+        console.log('  Navigating to:', url);
+        window.location.href = url;
+      });
+    }
+
+    console.log('🛡️ SAFNEX: All event listeners attached');
+  }, 100);
 }
 
 function escapeHtml(text) {
@@ -144,3 +122,4 @@ function escapeHtml(text) {
 
 // Signal extension is installed
 document.documentElement.setAttribute('data-safnex-installed', 'true');
+console.log('🛡️ SAFNEX: Extension initialized successfully');
