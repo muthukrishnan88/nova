@@ -84,55 +84,13 @@ function showSafnexPopup(url, result) {
         </div>
         <div class="safnex-body">
           <div class="safnex-spinner"></div>
-          <h3>Checking Link Safety...</h3>
+          <h3>Verifying Link...</h3>
           <p class="safnex-url">${escapeHtml(url)}</p>
-        </div>
-      </div>
-    `;
-  } else if (result.error) {
-    content = `
-      <div class="safnex-popup">
-        <div class="safnex-header">
-          <div class="safnex-logo">🛡️ SAFNEX NOVA</div>
-          <button class="safnex-close">✕</button>
-        </div>
-        <div class="safnex-body">
-          <div class="safnex-icon safnex-warning">⚠️</div>
-          <h3>Could Not Check Link</h3>
-          <p class="safnex-url">${escapeHtml(url)}</p>
-          <div class="safnex-actions">
-            <button class="safnex-btn safnex-btn-secondary" data-action="cancel">Cancel</button>
-            <button class="safnex-btn safnex-btn-primary" data-action="visit" data-url="${url}">Visit Anyway</button>
-          </div>
         </div>
       </div>
     `;
   } else {
-    const riskScore = result.riskScore || 0;
-    const riskLevel = result.riskLevel || "UNKNOWN";
-    const verdict = result.verdict || "Analysis incomplete";
-
-    let icon = '✓';
-    let iconClass = 'safnex-safe';
-    let actionType = 'visit';
-    let primaryLabel = 'Visit Site';
-
-    if (riskLevel === "HIGH" || riskLevel === "CRITICAL") {
-      icon = '⚠️';
-      iconClass = 'safnex-danger';
-      actionType = 'open-safnex';
-      primaryLabel = 'Check in SAFNEX';
-    } else if (riskLevel === "MEDIUM" || riskLevel === "SUSPICIOUS") {
-      icon = '⚠️';
-      iconClass = 'safnex-warning';
-      actionType = 'visit';
-      primaryLabel = 'Visit Site';
-    }
-
-    const reasons = result.reasons || [];
-    const reasonsHtml = reasons.length ?
-      `<ul class="safnex-reasons">${reasons.map(r => `<li>${escapeHtml(r)}</li>`).join('')}</ul>` : '';
-
+    // Simple professional popup - no risk scores
     content = `
       <div class="safnex-popup">
         <div class="safnex-header">
@@ -140,17 +98,13 @@ function showSafnexPopup(url, result) {
           <button class="safnex-close">✕</button>
         </div>
         <div class="safnex-body">
-          <div class="safnex-icon ${iconClass}">${icon}</div>
-          <h3>${riskLevel} RISK</h3>
-          <div class="safnex-score">Risk Score: ${riskScore}%</div>
-          <p class="safnex-verdict">${escapeHtml(verdict)}</p>
+          <div class="safnex-icon-simple">🔒</div>
+          <h3>Link Protection</h3>
           <p class="safnex-url">${escapeHtml(url)}</p>
-          ${reasonsHtml}
           <div class="safnex-actions">
-            <button class="safnex-btn safnex-btn-secondary" data-action="cancel">Cancel</button>
-            <button class="safnex-btn safnex-btn-primary" data-action="${actionType}" data-url="${url}">${primaryLabel}</button>
+            <button class="safnex-btn safnex-btn-secondary" data-action="check" data-url="${url}">Check Website</button>
+            <button class="safnex-btn safnex-btn-primary" data-action="open" data-url="${url}">Open Directly</button>
           </div>
-          <a class="safnex-full-report" data-url="${url}">View Full Report →</a>
         </div>
       </div>
     `;
@@ -165,31 +119,19 @@ function showSafnexPopup(url, result) {
     closeBtn.addEventListener('click', () => overlay.remove());
   }
 
-  const cancelBtn = overlay.querySelector('[data-action="cancel"]');
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', () => overlay.remove());
-  }
-
-  const primaryBtn = overlay.querySelector('[data-action="visit"], [data-action="open-safnex"]');
-  if (primaryBtn) {
-    const action = primaryBtn.getAttribute('data-action');
-    const targetUrl = primaryBtn.getAttribute('data-url');
-
-    primaryBtn.addEventListener('click', () => {
-      if (action === 'visit') {
-        window.location.href = targetUrl;
-      } else if (action === 'open-safnex') {
-        window.open(`https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(targetUrl)}`, '_blank');
-      }
+  const checkBtn = overlay.querySelector('[data-action="check"]');
+  if (checkBtn) {
+    const targetUrl = checkBtn.getAttribute('data-url');
+    checkBtn.addEventListener('click', () => {
+      window.open(`https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(targetUrl)}`, '_blank');
     });
   }
 
-  const fullReportLink = overlay.querySelector('.safnex-full-report');
-  if (fullReportLink) {
-    const targetUrl = fullReportLink.getAttribute('data-url');
-    fullReportLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.open(`https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(targetUrl)}`, '_blank');
+  const openBtn = overlay.querySelector('[data-action="open"]');
+  if (openBtn) {
+    const targetUrl = openBtn.getAttribute('data-url');
+    openBtn.addEventListener('click', () => {
+      window.location.href = targetUrl;
     });
   }
 }
