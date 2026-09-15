@@ -2591,6 +2591,25 @@ and (
 
     <div class="header-actions">
 
+        <a
+            href="get-extension.html"
+            class="header-button"
+            id="getExtensionBtn"
+            title="Get Browser Extension"
+            style="text-decoration:none; color:white;"
+        >
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+        </a>
+
         <button
             id="extensionBadge"
             class="header-button extension-badge"
@@ -3933,18 +3952,26 @@ function scrollToScanner() {
 // Extension detection and management
 function detectExtension() {
     const badge = $("extensionBadge");
-    if (!badge) return;
+    const getBtn = $("getExtensionBtn");
+    if (!badge || !getBtn) return;
 
     // Check if extension set the data attribute
-    if (document.documentElement.hasAttribute('data-safnex-installed')) {
+    const installed = document.documentElement.hasAttribute('data-safnex-installed');
+
+    if (installed) {
         badge.style.display = 'flex';
-        return;
+        getBtn.style.display = 'none';
+    } else {
+        badge.style.display = 'none';
+        getBtn.style.display = 'flex';
     }
 
-    // Fallback: check after delay
+    // Recheck after delay
     setTimeout(() => {
-        if (document.documentElement.hasAttribute('data-safnex-installed')) {
+        const nowInstalled = document.documentElement.hasAttribute('data-safnex-installed');
+        if (nowInstalled) {
             badge.style.display = 'flex';
+            getBtn.style.display = 'none';
         }
     }, 500);
 }
@@ -3953,8 +3980,9 @@ function showExtensionInfo() {
     showToast('🛡️ SAFNEX Link Guard is protecting you');
 }
 
-// Run detection on page load
+// Run detection on page load and periodically
 window.addEventListener('DOMContentLoaded', detectExtension);
+setInterval(detectExtension, 2000);
 
 function goTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
