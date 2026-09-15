@@ -21,34 +21,37 @@
     <strong>Instructions:</strong><br>
     1. Make sure extension is loaded in Chrome<br>
     2. Click any link below<br>
-    3. SAFNEX popup should appear before navigation<br>
-    4. Extension badge should show in top-right of SAFNEX website
+    3. SAFNEX popup should appear instantly<br>
+    4. Two buttons: "Check Website" or "Open Directly"
   </div>
 
   <div class="test-section">
     <h2>Test Links (Click to Test)</h2>
 
-    <h3>Safe Links:</h3>
-    <a href="https://google.com" class="safe">Google - Should show LOW RISK</a>
-    <a href="https://github.com" class="safe">GitHub - Should show LOW RISK</a>
+    <h3>External Links:</h3>
+    <a href="https://google.com" class="safe">Google - Test popup appears</a>
+    <a href="https://github.com" class="safe">GitHub - Test popup appears</a>
+    <a href="https://example.com" class="safe">Example.com - Test popup appears</a>
 
-    <h3>Suspicious Links:</h3>
-    <a href="https://bit.ly/test123" class="warning">Shortened URL - Should show MEDIUM/HIGH RISK</a>
-    <a href="https://tinyurl.com/test" class="warning">Another Short URL</a>
+    <h3>Shortened URLs:</h3>
+    <a href="https://bit.ly/test123" class="warning">Shortened URL - Test popup</a>
+    <a href="https://tinyurl.com/test" class="warning">Another Short URL - Test popup</a>
 
-    <h3>Test SAFNEX Website:</h3>
-    <a href="http://localhost:3000/home.html">SAFNEX Home (Local) - Check for extension badge</a>
+    <h3>Test SAFNEX Website (Production):</h3>
     <a href="https://safnex-nova.onrender.com/home.html">SAFNEX Home (Deployed)</a>
+    <a href="https://safnex-nova.onrender.com/link-detector.html">Link Detector</a>
   </div>
 
   <div class="test-section">
-    <h2>What Should Happen:</h2>
+    <h2>Expected Behavior:</h2>
     <ul>
-      <li>✓ Click any external link → Page doesn't navigate immediately</li>
-      <li>✓ Dark overlay appears with SAFNEX popup</li>
-      <li>✓ Shows risk analysis (loading → result)</li>
-      <li>✓ Options: Cancel, Visit Anyway, Check Full Report</li>
-      <li>✓ On SAFNEX website: shield badge appears top-right with green pulse</li>
+      <li>✓ Click any external link → Popup appears instantly</li>
+      <li>✓ Shows 🔒 lock icon + "Link Protection"</li>
+      <li>✓ Displays URL you clicked</li>
+      <li>✓ Two buttons: "Check Website" | "Open Directly"</li>
+      <li>✓ "Check Website" → Opens link-detector in new tab with analysis</li>
+      <li>✓ "Open Directly" → Navigates to URL immediately</li>
+      <li>✓ Close (X) button → Closes popup</li>
     </ul>
   </div>
 
@@ -57,8 +60,8 @@
     <ul>
       <li><strong>No popup?</strong> - Check extension loaded at chrome://extensions/</li>
       <li><strong>Console errors?</strong> - Press F12, check for errors</li>
-      <li><strong>API fails?</strong> - Make sure server running (localhost:3000)</li>
-      <li><strong>Badge not showing?</strong> - Refresh SAFNEX website after loading extension</li>
+      <li><strong>Shows "null" in console?</strong> - Extension not injecting on file:// URLs, test on https://example.com</li>
+      <li><strong>Buttons don't work?</strong> - Chrome cached old version, reload extension</li>
     </ul>
   </div>
 </body>

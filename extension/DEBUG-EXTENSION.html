@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Extension Debug Guide</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #00ff00; }
+    h1 { color: #00ffff; }
+    .step { background: #2a2a2a; padding: 15px; margin: 10px 0; border-left: 4px solid #00ff00; }
+    .error { color: #ff0000; }
+    .success { color: #00ff00; }
+    code { background: #000; padding: 2px 8px; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <h1>🔧 SAFNEX Extension Debug Guide</h1>
+  
+  <div class="step">
+    <h2>STEP 1: Check Extension Loaded</h2>
+    <p>1. Open: <code>chrome://extensions/</code></p>
+    <p>2. Find "SAFNEX NOVA Link Guard"</p>
+    <p>3. Check toggle is ON (blue)</p>
+    <p>4. Note the ID (long string like: kmjphhhccjpnkbnnmd...)</p>
+  </div>
+
+  <div class="step">
+    <h2>STEP 2: Check Service Worker</h2>
+    <p>1. On extension card, click "service worker" link</p>
+    <p>2. Console opens - check for errors</p>
+    <p>3. Should say: "SAFNEX NOVA Link Guard installed"</p>
+    <p class="error">If errors appear → Copy and share them</p>
+  </div>
+
+  <div class="step">
+    <h2>STEP 3: Check Content Script Injection</h2>
+    <p>1. Open this page in browser</p>
+    <p>2. Right-click → Inspect → Console tab</p>
+    <p>3. Type this command:</p>
+    <code>document.documentElement.getAttribute('data-safnex-installed')</code>
+    <p>4. Press Enter</p>
+    <p class="success">Expected: "true"</p>
+    <p class="error">If null → Content script not injecting</p>
+  </div>
+
+  <div class="step">
+    <h2>STEP 4: Check Manifest Permissions</h2>
+    <p>1. Open: extension/manifest.json</p>
+    <p>2. Verify has:</p>
+    <pre>
+"permissions": [
+  "activeTab",
+  "storage",
+  "webNavigation"
+],
+"host_permissions": [
+  "&lt;all_urls&gt;"
+]</pre>
+  </div>
+
+  <div class="step">
+    <h2>STEP 5: Manual Button Test</h2>
+    <p>Click any link below:</p>
+    <a href="https://google.com" style="color: #00ffff;">Test Link 1: Google</a><br>
+    <a href="https://github.com" style="color: #00ffff;">Test Link 2: GitHub</a>
+    <br><br>
+    <p class="success">Expected: Popup appears with 2 buttons</p>
+    <p class="error">If nothing happens → Run console tests below</p>
+  </div>
+
+  <div class="step">
+    <h2>STEP 6: Console Tests</h2>
+    <p>Open Console (F12) and run these one by one:</p>
+    
+    <p><strong>Test 1 - Check extension installed:</strong></p>
+    <code>document.documentElement.getAttribute('data-safnex-installed')</code>
+    
+    <p><strong>Test 2 - Check click listener:</strong></p>
+    <code>window.addEventListener('click', (e) => console.log('Click detected:', e.target), true)</code>
+    <p>Then click a link - should log to console</p>
+    
+    <p><strong>Test 3 - Manually trigger popup:</strong></p>
+    <pre style="background: #000; padding: 10px;">
+// Paste this entire block:
+const overlay = document.createElement('div');
+overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:999999;display:flex;align-items:center;justify-content:center';
+overlay.innerHTML = '&lt;div style="background:#1a1d29;padding:30px;border-radius:16px;color:white;text-align:center">&lt;h2>🔒 Test Popup&lt;/h2>&lt;p>If you see this, popup injection works&lt;/p>&lt;button onclick="this.closest(\'div\').parentElement.remove()" style="padding:10px 20px;margin:10px;background:#667eea;color:white;border:none;border-radius:8px;cursor:pointer">Close&lt;/button>&lt;/div>';
+document.body.appendChild(overlay);
+    </pre>
+  </div>
+
+  <div class="step">
+    <h2>STEP 7: Check File Timestamps</h2>
+    <p>Make sure extension files were updated:</p>
+    <p>Run in terminal:</p>
+    <code>ls -l extension/content.js extension/popup.css</code>
+    <p>Both should show TODAY's date (Sep 16)</p>
+    <p class="error">If old dates → Files not updated on disk</p>
+  </div>
+
+  <div class="step">
+    <h2>STEP 8: Nuclear Reload</h2>
+    <p>If all else fails:</p>
+    <ol>
+      <li>Close ALL Chrome windows completely</li>
+      <li>Delete: <code>C:\Users\MUTHU KRISHNAN\AppData\Local\Google\Chrome\User Data\Default\Extensions\[extension-id]</code></li>
+      <li>Reopen Chrome</li>
+      <li>chrome://extensions/ → Remove SAFNEX</li>
+      <li>Restart Chrome again</li>
+      <li>Load unpacked → Select extension folder</li>
+      <li>Test immediately</li>
+    </ol>
+  </div>
+
+  <div class="step">
+    <h2>COMMON PROBLEMS & SOLUTIONS</h2>
+    
+    <p><strong class="error">Problem: Popup appears but buttons don't work</strong></p>
+    <p>→ Right-click popup → Inspect</p>
+    <p>→ Check Console for errors</p>
+    <p>→ Look for "Refused to execute inline script" (CSP error)</p>
+    <p>→ Check if onclick still in code (should be 0)</p>
+    
+    <p><strong class="error">Problem: Popup doesn't appear at all</strong></p>
+    <p>→ Content script not injecting</p>
+    <p>→ Check manifest.json content_scripts section</p>
+    <p>→ Verify "matches": ["&lt;all_urls&gt;"]</p>
+    
+    <p><strong class="error">Problem: Buttons appear but no action</strong></p>
+    <p>→ Event listeners not attaching</p>
+    <p>→ Check console for "Uncaught TypeError"</p>
+    <p>→ querySelector might be failing</p>
+    
+    <p><strong class="error">Problem: Extension shows old version</strong></p>
+    <p>→ Chrome cached old files</p>
+    <p>→ Use Nuclear Reload (Step 8)</p>
+  </div>
+
+  <h2 style="color: #ff0000;">⚠️ REPORT BACK</h2>
+  <p>Run all tests above and report which step fails.</p>
+  <p>Include any console errors (exact text).</p>
+
+  <script>
+    console.log('🔧 SAFNEX Debug Page Loaded');
+    console.log('Extension installed:', document.documentElement.getAttribute('data-safnex-installed'));
+  </script>
+</body>
+</html>
