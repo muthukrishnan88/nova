@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Extension Links</title>
+  <style>
+    body { font-family: Arial; padding: 40px; }
+    h1 { color: #333; }
+    .test-links { margin: 30px 0; }
+    .test-links a { 
+      display: block; 
+      margin: 20px 0; 
+      padding: 15px; 
+      background: #f0f0f0; 
+      text-decoration: none; 
+      color: #0066cc;
+      border-radius: 8px;
+    }
+    .test-links a:hover { background: #e0e0e0; }
+  </style>
+</head>
+<body>
+  <h1>🧪 SAFNEX Extension Test Page</h1>
+  <p>Click any link below to test extension popup:</p>
+  
+  <div class="test-links">
+    <a href="https://google.com">Test Link 1: Google.com</a>
+    <a href="https://github.com">Test Link 2: GitHub.com</a>
+    <a href="https://example.com">Test Link 3: Example.com</a>
+    <a href="https://chatgpt.com">Test Link 4: ChatGPT.com</a>
+  </div>
+
+  <h2>Expected Behavior:</h2>
+  <ol>
+    <li>Click any link above</li>
+    <li>Extension popup should appear</li>
+    <li>Shows "Checking Link Safety..." spinner</li>
+    <li>Shows risk analysis result</li>
+    <li>All buttons should work:
+      <ul>
+        <li>✕ Close button - closes popup</li>
+        <li>Cancel button - closes popup</li>
+        <li>Visit Site button - opens link-detector with auto-fill</li>
+        <li>View Full Report link - opens link-detector with auto-fill</li>
+      </ul>
+    </li>
+  </ol>
+</body>
+</html>
