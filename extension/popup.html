@@ -99,11 +99,11 @@
       <div class="status-text">Protection Active</div>
     </div>
 
-    <button class="action-btn" onclick="openDashboard()">
+    <button class="action-btn" id="dashboardBtn">
       Open Dashboard
     </button>
 
-    <button class="settings-btn" onclick="openSettings()">
+    <button class="settings-btn" id="settingsBtn">
       Extension Settings
     </button>
 
@@ -113,13 +113,13 @@
   </div>
 
   <script>
-    function openDashboard() {
+    document.getElementById('dashboardBtn').addEventListener('click', () => {
       chrome.tabs.create({ url: 'https://safnex-nova.onrender.com/home.html' });
-    }
+    });
 
-    function openSettings() {
+    document.getElementById('settingsBtn').addEventListener('click', () => {
       chrome.runtime.openOptionsPage();
-    }
+    });
   </script>
 </body>
 </html>

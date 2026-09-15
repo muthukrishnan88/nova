@@ -94,15 +94,15 @@ function showSafnexPopup(url, result) {
       <div class="safnex-popup">
         <div class="safnex-header">
           <div class="safnex-logo">🛡️ SAFNEX NOVA</div>
-          <button class="safnex-close" onclick="this.closest('.safnex-overlay').remove()">✕</button>
+          <button class="safnex-close">✕</button>
         </div>
         <div class="safnex-body">
           <div class="safnex-icon safnex-warning">⚠️</div>
           <h3>Could Not Check Link</h3>
           <p class="safnex-url">${escapeHtml(url)}</p>
           <div class="safnex-actions">
-            <button class="safnex-btn safnex-btn-secondary" onclick="this.closest('.safnex-overlay').remove()">Cancel</button>
-            <button class="safnex-btn safnex-btn-primary" onclick="window.location.href='${escapeHtml(url)}'">Visit Anyway</button>
+            <button class="safnex-btn safnex-btn-secondary" data-action="cancel">Cancel</button>
+            <button class="safnex-btn safnex-btn-primary" data-action="visit" data-url="${escapeHtml(url)}">Visit Anyway</button>
           </div>
         </div>
       </div>
@@ -114,19 +114,19 @@ function showSafnexPopup(url, result) {
 
     let icon = '✓';
     let iconClass = 'safnex-safe';
-    let primaryAction = `window.location.href='${escapeHtml(url)}'`;
+    let actionType = 'visit';
     let primaryLabel = 'Visit Site';
 
     if (riskLevel === "HIGH" || riskLevel === "CRITICAL") {
       icon = '⚠️';
       iconClass = 'safnex-danger';
-      primaryAction = `window.open('https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(url)}', '_blank')`;
+      actionType = 'open-safnex';
       primaryLabel = 'Check in SAFNEX';
     } else if (riskLevel === "MEDIUM" || riskLevel === "SUSPICIOUS") {
       icon = '⚠️';
       iconClass = 'safnex-warning';
-      primaryAction = `window.location.href='${escapeHtml(url)}'`;
-      primaryLabel = 'Visit Anyway';
+      actionType = 'visit';
+      primaryLabel = 'Visit Site';
     }
 
     const reasons = result.reasons || [];
@@ -137,7 +137,7 @@ function showSafnexPopup(url, result) {
       <div class="safnex-popup">
         <div class="safnex-header">
           <div class="safnex-logo">🛡️ SAFNEX NOVA</div>
-          <button class="safnex-close" onclick="this.closest('.safnex-overlay').remove()">✕</button>
+          <button class="safnex-close">✕</button>
         </div>
         <div class="safnex-body">
           <div class="safnex-icon ${iconClass}">${icon}</div>
@@ -147,8 +147,8 @@ function showSafnexPopup(url, result) {
           <p class="safnex-url">${escapeHtml(url)}</p>
           ${reasonsHtml}
           <div class="safnex-actions">
-            <button class="safnex-btn safnex-btn-secondary" onclick="this.closest('.safnex-overlay').remove()">Cancel</button>
-            <button class="safnex-btn safnex-btn-primary" onclick="${primaryAction}">${primaryLabel}</button>
+            <button class="safnex-btn safnex-btn-secondary" data-action="cancel">Cancel</button>
+            <button class="safnex-btn safnex-btn-primary" data-action="${actionType}" data-url="${escapeHtml(url)}">${primaryLabel}</button>
           </div>
           <a href="https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(url)}" target="_blank" class="safnex-full-report">View Full Report →</a>
         </div>
@@ -158,6 +158,31 @@ function showSafnexPopup(url, result) {
 
   overlay.innerHTML = content;
   document.body.appendChild(overlay);
+
+  // Attach event listeners (CSP-compliant)
+  const closeBtn = overlay.querySelector('.safnex-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => overlay.remove());
+  }
+
+  const cancelBtn = overlay.querySelector('[data-action="cancel"]');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => overlay.remove());
+  }
+
+  const primaryBtn = overlay.querySelector('[data-action="visit"], [data-action="open-safnex"]');
+  if (primaryBtn) {
+    const action = primaryBtn.getAttribute('data-action');
+    const targetUrl = primaryBtn.getAttribute('data-url');
+
+    primaryBtn.addEventListener('click', () => {
+      if (action === 'visit') {
+        window.location.href = targetUrl;
+      } else if (action === 'open-safnex') {
+        window.open(`https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(targetUrl)}`, '_blank');
+      }
+    });
+  }
 }
 
 function escapeHtml(text) {
