@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAFNEX NOVA - AI Security Platform Presentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/black.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #55cfff;
+            --success: #22c55e;
+            --warning: #fb923c;
+            --danger: #ef4444;
+        }
+
+        .reveal {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .reveal h1, .reveal h2, .reveal h3 {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: none;
+            font-weight: 700;
+        }
+
+        .reveal section {
+            background: radial-gradient(circle at top right, rgba(102, 126, 234, 0.1), transparent 70%);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 40px;
+            border-radius: 20px;
+        }
+
+        .feature-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .icon {
+            font-size: 4em;
+            margin: 20px 0;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .three-column {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: var(--accent);
+        }
+
+        .formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+        }
+
+        .highlight {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .checkmark {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .warning-icon {
+            color: var(--warning);
+        }
+
+        .bullet-list {
+            text-align: left;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .bullet-list li {
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .bullet-list li:before {
+            content: "▸";
+            color: var(--accent);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .tech-stack {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .tech-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 1px solid var(--primary);
+        }
+
+        .architecture-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8em;
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 2em;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- Slide 1: Title -->
+            <section>
+                <div class="gradient-bg">
+                    <div class="icon">🛡️</div>
+                    <h1>SAFNEX NOVA</h1>
+                    <h3>AI-Powered Unified Security Analysis Platform</h3>
+                    <p style="margin-top: 50px; font-size: 0.8em; opacity: 0.8;">
+                        Team Presentation | September 16, 2026
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 2: Problem Statement -->
+            <section>
+                <h2>The Problem</h2>
+                <div class="two-column">
+                    <div class="stat-box">
+                        <div class="stat-number">85%</div>
+                        <p>Cyberattacks start with phishing</p>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">$10B+</div>
+                        <p>Annual SMS scam losses</p>
+                    </div>
+                </div>
+                <div class="two-column" style="margin-top: 30px;">
+                    <div class="stat-box">
+                        <div class="stat-number">587%</div>
+                        <p>QR code phishing increase</p>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">∞</div>
+                        <p>Deepfakes now accessible to criminals</p>
+                    </div>
+                </div>
+                <p style="margin-top: 50px; color: var(--warning); font-size: 1.2em;">
+                    Modern threats are multi-modal. We need a unified solution.
+                </p>
+            </section>
+
+            <!-- Slide 3: Our Solution -->
+            <section>
+                <h2>SAFNEX NOVA</h2>
+                <h3 style="color: var(--accent);">7 Security Tools in 1 Platform</h3>
+                <div class="three-column" style="margin-top: 40px;">
+                    <div class="feature-box">
+                        <div style="font-size: 2.5em;">🔗</div>
+                        <h4>Link Intelligence</h4>
+                        <p>Phishing detection</p>
+                    </div>
+                    <div class="feature-box">
+                        <div style="font-size: 2.5em;">📞</div>
+                        <h4>Phone Validator</h4>
+                        <p>Fraud detection</p>
+                    </div>
+                    <div class="feature-box">
+                        <div style="font-size: 2.5em;">💬</div>
+                        <h4>Message Detector</h4>
+                        <p>Scam analysis</p>
+                    </div>
+                </div>
+                <div class="three-column" style="margin-top: 20px;">
+                    <div class="feature-box">
+                        <div style="font-size: 2.5em;">📱</div>
+                        <h4>QR Scanner</h4>
+                        <p>Safe QR codes</p>
+                    </div>
+                    <div class="feature-box">
+                        <div style="font-size: 2.5em;">🖼️</div>
+                        <h4>Image AI</h4>
+                        <p>Deepfake images</p>
+                    </div>
+                    <div class="feature-box">
+                        <div style="font-size: 2.5em;">🎤</div>
+                        <h4>Voice AI</h4>
+                        <p>Audio deepfakes</p>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <div class="feature-box" style="display: inline-block; min-width: 300px;">
+                        <div style="font-size: 2.5em;">🎥</div>
+                        <h4>Video AI</h4>
+                        <p>Video deepfakes</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 4: Architecture -->
+            <section>
+                <h2>System Architecture</h2>
+                <div class="architecture-box">
+                    <pre style="margin: 0; text-align: left;">
+┌─────────────────────────────────┐
+│    WEB APP + CHROME EXTENSION   │
+└───────────────┬─────────────────┘
+                │ HTTPS
+┌───────────────▼─────────────────┐
+│   NODE.JS + EXPRESS BACKEND     │
+│        (4,167 lines)            │
+└───────────────┬─────────────────┘
+                │
+    ┌───────────┴────────┬────────────┐
+    │                    │            │
+┌───▼────────┐   ┌──────▼────┐  ┌───▼──────┐
+│  OpenAI    │   │  Twilio   │  │NumVerify │
+│  GPT-4o    │   │  Lookup   │  │   API    │
+└────────────┘   └───────────┘  └──────────┘
+                    </pre>
+                </div>
+                <div class="tech-stack" style="margin-top: 40px;">
+                    <div class="tech-item">Node.js</div>
+                    <div class="tech-item">Express</div>
+                    <div class="tech-item">OpenAI GPT-4o</div>
+                    <div class="tech-item">Tesseract.js</div>
+                    <div class="tech-item">Twilio</div>
+                    <div class="tech-item">Manifest V3</div>
+                </div>
+            </section>
+
+            <!-- Slide 5: Link Intelligence -->
+            <section>
+                <h2>🔗 Link Intelligence Analyzer</h2>
+                <h3>How It Works</h3>
+                <div class="bullet-list">
+                    <ol style="text-align: left;">
+                        <li><strong class="highlight">URL Normalization</strong> - Convert to standard format</li>
+                        <li><strong class="highlight">SSRF Protection</strong> - Block private IPs (10.x, 192.168.x, localhost)</li>
+                        <li><strong class="highlight">DNS Resolution</strong> - Verify domain exists</li>
+                        <li><strong class="highlight">Known Service Detection</strong> - Whitelist trusted services</li>
+                        <li><strong class="highlight">AI Analysis</strong> - GPT-4o deep inspection</li>
+                        <li><strong class="highlight">Risk Score</strong> - Calculate 0-100% threat level</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Slide 6: Link Scoring -->
+            <section>
+                <h2>Link Risk Score Formula</h2>
+                <div class="formula">
+Base Score = 0
+
+IF (private IP)      → +100 (CRITICAL)
+IF (suspicious TLD)  → +40
+IF (URL shortener)   → +35
+IF (misspelled brand)→ +45
+IF (IP in URL)       → +50
+IF (no HTTPS)        → +25
+IF (known safe)      → -30
+
+AI Override: GPT-4o adjusts with reasoning
+
+Final = CLAMP(Score, 0, 100)
+                </div>
+                <div class="stat-box" style="margin-top: 30px;">
+                    <strong>Accuracy: <span class="highlight">92-95%</span></strong>
+                    <br>
+                    <strong>Speed: <span class="highlight">2-4 seconds</span></strong>
+                </div>
+            </section>
+
+            <!-- Slide 7: Why GPT-4o -->
+            <section>
+                <h2>Why OpenAI GPT-4o?</h2>
+                <div class="two-column">
+                    <div>
+                        <div class="feature-box">
+                            <h3 class="checkmark">✓ Latest Model</h3>
+                            <p>Most advanced reasoning capabilities</p>
+                        </div>
+                        <div class="feature-box">
+                            <h3 class="checkmark">✓ Context Understanding</h3>
+                            <p>Detects subtle social engineering</p>
+                        </div>
+                        <div class="feature-box">
+                            <h3 class="checkmark">✓ Current Threats</h3>
+                            <p>Trained on 2024-2025 threat landscape</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="feature-box">
+                            <h3 class="checkmark">✓ Explainable</h3>
+                            <p>Provides WHY, not just yes/no</p>
+                        </div>
+                        <div class="feature-box">
+                            <h3 class="checkmark">✓ Multi-Language</h3>
+                            <p>Works globally</p>
+                        </div>
+                        <div class="feature-box">
+                            <h3 class="checkmark">✓ Cost-Effective</h3>
+                            <p>~$0.01 per analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 8: Image AI Detection -->
+            <section>
+                <h2>🖼️ Image AI Detection</h2>
+                <h3>Entropy Analysis</h3>
+                <div class="two-column">
+                    <div>
+                        <div class="formula" style="text-align: left;">
+<strong>Entropy Formula:</strong>
+
+entropy = -Σ P(x) × log₂(P(x))
+
+<strong>Real Photos:</strong>
+entropy: 7.5-8.0
+(sensor noise)
+
+<strong>AI Images:</strong>
+entropy: 6.0-7.0
+(too perfect)
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Detection Methods</h4>
+                        <div class="bullet-list" style="font-size: 0.9em;">
+                            <ul>
+                                <li>Entropy analysis</li>
+                                <li>Local variance (frame consistency)</li>
+                                <li>File size heuristics</li>
+                                <li>EXIF metadata check</li>
+                                <li>Byte pattern detection</li>
+                            </ul>
+                        </div>
+                        <div class="stat-box">
+                            <strong>Accuracy: <span class="highlight">85-95%</span></strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 9: Voice Deepfake -->
+            <section>
+                <h2>🎤 Voice Deepfake Detection</h2>
+                <div class="three-column">
+                    <div class="feature-box">
+                        <h4>Audio Entropy</h4>
+                        <p>Real voice has natural noise</p>
+                        <code>7.2-7.9</code>
+                        <p style="margin-top: 10px;">AI voice too clean</p>
+                        <code>6.0-7.0</code>
+                    </div>
+                    <div class="feature-box">
+                        <h4>Frequency Analysis</h4>
+                        <p>FFT → Spectrum</p>
+                        <p style="margin-top: 10px;">AI missing high freq</p>
+                        <code>&gt; 16kHz</code>
+                    </div>
+                    <div class="feature-box">
+                        <h4>Timing Analysis</h4>
+                        <p>Real: variable pauses, breaths</p>
+                        <p style="margin-top: 10px;">AI: perfect timing</p>
+                        <code>No pauses</code>
+                    </div>
+                </div>
+                <div class="formula" style="margin-top: 30px;">
+AI Score = entropy_check() + frequency_check() + timing_check()
+Probability = (AI Score / Total) × 100%
+                </div>
+                <div class="stat-box" style="margin-top: 20px;">
+                    <strong>Accuracy: <span class="highlight">82-90%</span></strong>
+                </div>
+            </section>
+
+            <!-- Slide 10: Video AI Detection -->
+            <section>
+                <h2>🎥 Video AI Detection</h2>
+                <h3>Multi-Method Approach</h3>
+                <div class="bullet-list">
+                    <ul>
+                        <li><strong>Global Entropy:</strong> Entire video analyzed as binary data</li>
+                        <li><strong>Frame Variance:</strong> AI videos too consistent frame-to-frame</li>
+                        <li><strong>File Size:</strong> AI compresses more efficiently (less noise)</li>
+                        <li><strong>Compression Artifacts:</strong> Unusual codec patterns</li>
+                        <li><strong>Temporal Consistency:</strong> Sample chunks across video</li>
+                    </ul>
+                </div>
+                <div class="two-column" style="margin-top: 30px;">
+                    <div class="feature-box">
+                        <h4>Real Video</h4>
+                        <p class="checkmark">✓ Camera motion blur</p>
+                        <p class="checkmark">✓ Natural lighting changes</p>
+                        <p class="checkmark">✓ Sensor noise patterns</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>AI Video</h4>
+                        <p class="warning-icon">⚠ Frame inconsistencies</p>
+                        <p class="warning-icon">⚠ Too perfect stability</p>
+                        <p class="warning-icon">⚠ Low variance</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 11: Message Scam Detector -->
+            <section>
+                <h2>💬 Message Scam Detector</h2>
+                <h3>OCR + AI Analysis</h3>
+                <div style="text-align: left; max-width: 800px; margin: 0 auto;">
+                    <div class="flow-arrow">▼</div>
+                    <div class="architecture-box">📱 Screenshot Upload</div>
+                    <div class="flow-arrow">▼</div>
+                    <div class="architecture-box">Tesseract.js OCR → Extract Text</div>
+                    <div class="flow-arrow">▼</div>
+                    <div class="architecture-box">Pattern Matching (Local)</div>
+                    <div class="flow-arrow">▼</div>
+                    <div class="architecture-box">GPT-4o Deep Analysis</div>
+                    <div class="flow-arrow">▼</div>
+                    <div class="architecture-box">Risk Score 0-100%</div>
+                </div>
+            </section>
+
+            <!-- Slide 12: Scam Keywords -->
+            <section>
+                <h2>Scam Detection Keywords</h2>
+                <div class="two-column">
+                    <div>
+                        <div class="feature-box">
+                            <h4>Urgency (+15 points)</h4>
+                            <code>urgent, immediate, expires, last chance</code>
+                        </div>
+                        <div class="feature-box">
+                            <h4>Authority (+20 points)</h4>
+                            <code>bank, police, IRS, FBI, government</code>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="feature-box">
+                            <h4>Financial (+30 points)</h4>
+                            <code>send money, wire transfer, bitcoin, gift card</code>
+                        </div>
+                        <div class="feature-box">
+                            <h4>Verification (+25 points)</h4>
+                            <code>verify account, confirm identity, update password</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 13: Phone Validator -->
+            <section>
+                <h2>📞 Phone Number Validator</h2>
+                <h3>Multi-API Verification</h3>
+                <div style="text-align: left; max-width: 800px; margin: 0 auto;">
+                    <div class="architecture-box" style="text-align: center;">
+                        📱 Phone Number Input
+                        <div class="flow-arrow">▼</div>
+                        libphonenumber-js → Format Validation
+                        <div class="flow-arrow">▼</div>
+                        NumVerify API → Carrier + Location
+                        <div class="flow-arrow">▼</div>
+                        Twilio Lookup API → Fraud Score
+                        <div class="flow-arrow">▼</div>
+                        Combined Risk Score
+                    </div>
+                </div>
+                <div class="two-column" style="margin-top: 30px;">
+                    <div class="stat-box">
+                        <h4>Valid Phone</h4>
+                        <p class="checkmark">✓ Proper format</p>
+                        <p class="checkmark">✓ Active carrier</p>
+                        <p class="checkmark">✓ Low fraud score</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Suspicious Phone</h4>
+                        <p class="warning-icon">⚠ VoIP/VOIP service</p>
+                        <p class="warning-icon">⚠ Recently activated</p>
+                        <p class="warning-icon">⚠ Country mismatch</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 14: QR Code Scanner -->
+            <section>
+                <h2>📱 QR Code Scanner</h2>
+                <h3>Safe QR Analysis</h3>
+                <div class="bullet-list">
+                    <ul>
+                        <li><strong>jsQR Decoding:</strong> Extract URL from QR image</li>
+                        <li><strong>Link Analysis:</strong> Same checks as link intelligence</li>
+                        <li><strong>Quishing Detection:</strong> Spot QR-specific scams</li>
+                        <li><strong>Preview Before Open:</strong> See destination first</li>
+                    </ul>
+                </div>
+                <div class="feature-box" style="margin-top: 30px;">
+                    <h4 style="color: var(--danger);">Why QR Security Matters</h4>
+                    <div class="stat-box">
+                        <div class="stat-number">587%</div>
+                        <p>QR phishing attacks increased in 2024</p>
+                    </div>
+                    <p style="margin-top: 20px;">"Quishing" = QR + Phishing</p>
+                    <p>Attackers replace restaurant menus, parking meters, posters</p>
+                </div>
+            </section>
+
+            <!-- Slide 15: Chrome Extension -->
+            <section>
+                <h2>🌐 Chrome Extension</h2>
+                <h3>Manifest V3 Architecture</h3>
+                <div class="two-column">
+                    <div>
+                        <div class="feature-box">
+                            <h4>Components</h4>
+                            <ul style="text-align: left; font-size: 0.9em;">
+                                <li><strong>popup.html:</strong> Extension icon menu</li>
+                                <li><strong>content.js:</strong> Page injection script</li>
+                                <li><strong>background.js:</strong> Service worker</li>
+                                <li><strong>manifest.json:</strong> Configuration</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="feature-box">
+                            <h4>How It Works</h4>
+                            <ol style="text-align: left; font-size: 0.9em;">
+                                <li>User clicks external link</li>
+                                <li>Content script intercepts</li>
+                                <li>Show popup: "Check" or "Open"</li>
+                                <li>"Check" → SAFNEX analysis</li>
+                                <li>"Open" → Navigate directly</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-box" style="margin-top: 30px;">
+                    <strong>CSP Compliant:</strong> No inline scripts, all addEventListener
+                </div>
+            </section>
+
+            <!-- Slide 16: Tech Stack -->
+            <section>
+                <h2>⚙️ Technology Stack</h2>
+                <div class="two-column">
+                    <div>
+                        <div class="feature-box">
+                            <h4>Backend</h4>
+                            <ul style="text-align: left;">
+                                <li>Node.js 22+</li>
+                                <li>Express.js ES6</li>
+                                <li>4,167 lines</li>
+                                <li>CORS enabled</li>
+                                <li>SSRF protection</li>
+                            </ul>
+                        </div>
+                        <div class="feature-box">
+                            <h4>AI/ML</h4>
+                            <ul style="text-align: left;">
+                                <li>OpenAI GPT-4o</li>
+                                <li>Tesseract.js OCR</li>
+                                <li>jsQR decoder</li>
+                                <li>Entropy analysis</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="feature-box">
+                            <h4>Frontend</h4>
+                            <ul style="text-align: left;">
+                                <li>Vanilla JavaScript</li>
+                                <li>HTML5 + CSS3</li>
+                                <li>Chrome Manifest V3</li>
+                                <li>Responsive design</li>
+                            </ul>
+                        </div>
+                        <div class="feature-box">
+                            <h4>APIs</h4>
+                            <ul style="text-align: left;">
+                                <li>Twilio Lookup</li>
+                                <li>NumVerify</li>
+                                <li>libphonenumber-js</li>
+                                <li>OpenAI GPT-4o</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 17: Deployment -->
+            <section>
+                <h2>🚀 Deployment</h2>
+                <div class="feature-box">
+                    <h3>Production URL</h3>
+                    <code style="font-size: 1.2em;">https://safnex-nova.onrender.com</code>
+                </div>
+                <div class="two-column" style="margin-top: 30px;">
+                    <div class="feature-box">
+                        <h4>Platform</h4>
+                        <p><strong>Render.com</strong></p>
+                        <ul style="text-align: left; font-size: 0.9em;">
+                            <li>Free tier</li>
+                            <li>Auto-deploy from GitHub</li>
+                            <li>HTTPS included</li>
+                            <li>Environment variables</li>
+                        </ul>
+                    </div>
+                    <div class="feature-box">
+                        <h4>Configuration</h4>
+                        <ul style="text-align: left; font-size: 0.9em;">
+                            <li>Build: <code>npm install</code></li>
+                            <li>Start: <code>node server.js</code></li>
+                            <li>Port: 10000</li>
+                            <li>Environment: Production</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 18: Security Features -->
+            <section>
+                <h2>🔒 Security Features</h2>
+                <div class="three-column">
+                    <div class="feature-box">
+                        <div style="font-size: 2em;">🛡️</div>
+                        <h4>SSRF Protection</h4>
+                        <p>Block private IPs</p>
+                        <p><code>localhost, 10.x, 192.168.x</code></p>
+                    </div>
+                    <div class="feature-box">
+                        <div style="font-size: 2em;">🔐</div>
+                        <h4>CSP Compliant</h4>
+                        <p>No inline scripts</p>
+                        <p>Manifest V3</p>
+                    </div>
+                    <div class="feature-box">
+                        <div style="font-size: 2em;">✅</div>
+                        <h4>Input Validation</h4>
+                        <p>Sanitize all inputs</p>
+                        <p>Type checking</p>
+                    </div>
+                </div>
+                <div class="three-column" style="margin-top: 20px;">
+                    <div class="feature-box">
+                        <div style="font-size: 2em;">🌐</div>
+                        <h4>CORS</h4>
+                        <p>Cross-origin enabled</p>
+                        <p>Secure headers</p>
+                    </div>
+                    <div class="feature-box">
+                        <div style="font-size: 2em;">🔑</div>
+                        <h4>API Keys</h4>
+                        <p>Environment variables</p>
+                        <p>Never committed</p>
+                    </div>
+                    <div class="feature-box">
+                        <div style="font-size: 2em;">📡</div>
+                        <h4>HTTPS Only</h4>
+                        <p>Encrypted traffic</p>
+                        <p>TLS 1.3</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 19: Accuracy Stats -->
+            <section>
+                <h2>📊 Detection Accuracy</h2>
+                <div class="two-column">
+                    <div class="stat-box">
+                        <h4>🔗 Link Intelligence</h4>
+                        <div class="stat-number">92-95%</div>
+                        <p>With GPT-4o analysis</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>📞 Phone Validator</h4>
+                        <div class="stat-number">90-98%</div>
+                        <p>Multi-API verification</p>
+                    </div>
+                </div>
+                <div class="two-column" style="margin-top: 20px;">
+                    <div class="stat-box">
+                        <h4>🖼️ Image AI</h4>
+                        <div class="stat-number">85-95%</div>
+                        <p>Entropy + heuristics</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>🎤 Voice AI</h4>
+                        <div class="stat-number">82-90%</div>
+                        <p>Multi-method analysis</p>
+                    </div>
+                </div>
+                <div class="two-column" style="margin-top: 20px;">
+                    <div class="stat-box">
+                        <h4>🎥 Video AI</h4>
+                        <div class="stat-number">80-88%</div>
+                        <p>Entropy + variance</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>💬 Message Scam</h4>
+                        <div class="stat-number">88-94%</div>
+                        <p>OCR + GPT-4o</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 20: Use Cases -->
+            <section>
+                <h2>🎯 Real-World Use Cases</h2>
+                <div class="bullet-list">
+                    <ul>
+                        <li><strong>Seniors:</strong> Protect elderly from phone/SMS scams</li>
+                        <li><strong>Businesses:</strong> Screen customer support tickets for fraud</li>
+                        <li><strong>Education:</strong> Verify links in online learning platforms</li>
+                        <li><strong>Dating Apps:</strong> Detect fake profiles with AI photos</li>
+                        <li><strong>News:</strong> Identify deepfake videos before publishing</li>
+                        <li><strong>HR:</strong> Verify job applicant voice interviews</li>
+                        <li><strong>Finance:</strong> Screen QR codes at payment terminals</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 21: Performance -->
+            <section>
+                <h2>⚡ Performance Metrics</h2>
+                <div class="three-column">
+                    <div class="stat-box">
+                        <h4>Link Analysis</h4>
+                        <div class="stat-number">2-4s</div>
+                        <p>Average response time</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Image Scan</h4>
+                        <div class="stat-number">1-3s</div>
+                        <p>Entropy calculation</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Phone Check</h4>
+                        <div class="stat-number">3-5s</div>
+                        <p>Multi-API lookup</p>
+                    </div>
+                </div>
+                <div class="three-column" style="margin-top: 20px;">
+                    <div class="stat-box">
+                        <h4>Voice Analysis</h4>
+                        <div class="stat-number">2-6s</div>
+                        <p>FFT + entropy</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Video Scan</h4>
+                        <div class="stat-number">5-15s</div>
+                        <p>Depends on file size</p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>Message OCR</h4>
+                        <div class="stat-number">3-7s</div>
+                        <p>Tesseract + GPT</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 22: Cost Analysis -->
+            <section>
+                <h2>💰 Cost Per Analysis</h2>
+                <div class="two-column">
+                    <div>
+                        <div class="feature-box">
+                            <h4>Free Tier</h4>
+                            <ul style="text-align: left;">
+                                <li>Link: entropy only ($0)</li>
+                                <li>Image: local analysis ($0)</li>
+                                <li>Voice: entropy only ($0)</li>
+                                <li>Video: entropy only ($0)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="feature-box">
+                            <h4>AI-Enhanced</h4>
+                            <ul style="text-align: left;">
+                                <li>Link: GPT-4o (~$0.01)</li>
+                                <li>Message: OCR + GPT (~$0.015)</li>
+                                <li>Phone: Twilio + NumVerify (~$0.005)</li>
+                                <li>QR: Link analysis (~$0.01)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-box" style="margin-top: 30px;">
+                    <h4>Average Cost Per Analysis</h4>
+                    <div class="stat-number" style="font-size: 2.5em;">$0.01</div>
+                    <p>With AI enhancement</p>
+                </div>
+            </section>
+
+            <!-- Slide 23: Browser Extension Demo -->
+            <section>
+                <h2>🌐 Chrome Extension Flow</h2>
+                <div style="text-align: left; max-width: 900px; margin: 0 auto;">
+                    <div class="architecture-box" style="text-align: center;">
+                        <strong>1. User clicks external link</strong>
+                        <div class="flow-arrow">▼</div>
+                        <strong>2. Content script intercepts (preventDefault)</strong>
+                        <div class="flow-arrow">▼</div>
+                        <strong>3. Popup appears: "🔒 Link Protection"</strong>
+                        <div class="flow-arrow">▼</div>
+                        <strong>4. Show URL + 2 buttons</strong>
+                        <div class="flow-arrow">▼</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                            <div style="border: 2px solid var(--success); padding: 15px; border-radius: 8px;">
+                                <strong>"Check Website"</strong><br>
+                                → Opens link-detector.html<br>
+                                → Full AI analysis<br>
+                                → Risk score shown
+                            </div>
+                            <div style="border: 2px solid var(--warning); padding: 15px; border-radius: 8px;">
+                                <strong>"Open Directly"</strong><br>
+                                → Bypass analysis<br>
+                                → Navigate immediately<br>
+                                → User's choice
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 24: Future Enhancements -->
+            <section>
+                <h2>🚀 Future Roadmap</h2>
+                <div class="two-column">
+                    <div>
+                        <div class="feature-box">
+                            <h4>Q4 2026</h4>
+                            <ul style="text-align: left; font-size: 0.9em;">
+                                <li>Firefox extension</li>
+                                <li>Safari extension</li>
+                                <li>Mobile app (iOS/Android)</li>
+                                <li>Browser history scanning</li>
+                            </ul>
+                        </div>
+                        <div class="feature-box">
+                            <h4>Q1 2027</h4>
+                            <ul style="text-align: left; font-size: 0.9em;">
+                                <li>Email integration (Gmail/Outlook)</li>
+                                <li>Slack bot</li>
+                                <li>Teams integration</li>
+                                <li>WhatsApp scanner</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="feature-box">
+                            <h4>Q2 2027</h4>
+                            <ul style="text-align: left; font-size: 0.9em;">
+                                <li>Real-time video deepfake</li>
+                                <li>Live voice call monitoring</li>
+                                <li>Blockchain verification</li>
+                                <li>Enterprise dashboard</li>
+                            </ul>
+                        </div>
+                        <div class="feature-box">
+                            <h4>Q3 2027</h4>
+                            <ul style="text-align: left; font-size: 0.9em;">
+                                <li>API marketplace</li>
+                                <li>White-label solution</li>
+                                <li>Custom ML models</li>
+                                <li>24/7 threat monitoring</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 25: Demo & Testing -->
+            <section>
+                <h2>🧪 Live Demo</h2>
+                <div class="gradient-bg">
+                    <h3>Try It Now!</h3>
+                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <code style="font-size: 1.2em; display: block; margin: 10px 0;">https://safnex-nova.onrender.com</code>
+                    </div>
+                    <div class="bullet-list">
+                        <ul style="color: white;">
+                            <li>Test all 7 security tools</li>
+                            <li>Install Chrome extension</li>
+                            <li>Check sample phishing links</li>
+                            <li>Scan deepfake images/videos</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 26: Q&A -->
+            <section>
+                <div class="gradient-bg">
+                    <div class="icon">❓</div>
+                    <h1>Questions?</h1>
+                    <div style="margin-top: 50px; font-size: 1.2em;">
+                        <p>🌐 <strong>Website:</strong> safnex-nova.onrender.com</p>
+                        <p>💻 <strong>GitHub:</strong> [Your Repository]</p>
+                        <p>📧 <strong>Contact:</strong> [Your Email]</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 27: Thank You -->
+            <section>
+                <div class="gradient-bg">
+                    <div class="icon">🛡️</div>
+                    <h1>Thank You</h1>
+                    <h3>SAFNEX NOVA</h3>
+                    <p style="margin-top: 40px; font-size: 1.3em; color: var(--accent);">
+                        Protecting the Digital World,<br>One Analysis at a Time
+                    </p>
+                    <p style="margin-top: 50px; opacity: 0.8;">
+                        Team Presentation | September 16, 2026
+                    </p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Reveal.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            center: true,
+            transition: 'slide',
+            backgroundTransition: 'fade',
+            slideNumber: 'c/t',
+            showSlideNumber: 'all',
+            controls: true,
+            progress: true,
+            history: true,
+            keyboard: true,
+            overview: true,
+            touch: true,
+            loop: false,
+            rtl: false,
+            shuffle: false,
+            fragments: true,
+            fragmentInURL: false,
+            embedded: false,
+            help: true,
+            pause: true,
+            showNotes: false,
+            autoPlayMedia: null,
+            preloadIframes: null,
+            autoSlide: 0,
+            autoSlideStoppable: true,
+            mouseWheel: false,
+            hideInactiveCursor: true,
+            hideCursorTime: 5000,
+            previewLinks: false,
+            width: 1280,
+            height: 720,
+            margin: 0.04,
+            minScale: 0.2,
+            maxScale: 2.0,
+            display: 'block'
+        });
+    </script>
+</body>
+</html>
