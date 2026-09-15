@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="0; url=SAFNEX-PRESENTATION.html">
+    <title>Redirecting to SAFNEX Presentation...</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .loader {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        a {
+            color: #55cfff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ SAFNEX NOVA</h1>
+        <p>Loading presentation...</p>
+        <div class="loader"></div>
+        <p style="margin-top: 30px; font-size: 0.9em; opacity: 0.8;">
+            If not redirected automatically,
+            <a href="SAFNEX-PRESENTATION.html">click here</a>
+        </p>
+    </div>
+    <script>
+        // Redirect after 1 second
+        setTimeout(function() {
+            window.location.href = 'SAFNEX-PRESENTATION.html';
+        }, 1000);
+    </script>
+</body>
+</html>
