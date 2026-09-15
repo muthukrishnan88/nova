@@ -700,7 +700,7 @@ body{
 
 <script>
 const VIDEO_API_URL = window.SAFNEX_VIDEO_API_URL || "/api/video-analyze";
-const MAX_FILE_SIZE = 100 * 1024 * 1024;
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB limit
 
 const uploadBox = document.getElementById("uploadBox");
 const fileInput = document.getElementById("fileInput");
@@ -1023,7 +1023,7 @@ function escapeHtml(value){
    video-detector.html?url=https://example.com/video.mp4
    OR from home.html via sessionStorage
 ========================================================= */
-(async function(){
+setTimeout(async () => {
   try{
     const stored=sessionStorage.getItem("safnexVideoData");
     if(stored){
@@ -1033,6 +1033,7 @@ function escapeHtml(value){
       const response=await fetch(data.base64);
       const blob=await response.blob();
       selectedFile=new File([blob],data.name,{type:data.type});
+      selectedDataUrl=data.base64;
 
       videoPlayer.src=data.base64;
       videoPreview.style.display="block";
@@ -1064,17 +1065,22 @@ function escapeHtml(value){
 
     selectedFile=new File([blob],videoUrl.split('/').pop()||"downloaded-video.mp4",{type:blob.type});
     const objectUrl=URL.createObjectURL(blob);
-    videoPlayer.src=objectUrl;
-    videoPreview.style.display="block";
-    fileName.textContent=selectedFile.name;
-    fileMeta.textContent=formatFileSize(selectedFile.size);
 
-    await delay(100);
-    await analyzeVideo();
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      selectedDataUrl=e.target.result;
+      videoPlayer.src=objectUrl;
+      videoPreview.style.display="block";
+      fileName.textContent=selectedFile.name;
+      fileMeta.textContent=formatFileSize(selectedFile.size);
+      await delay(100);
+      await analyzeVideo();
+    };
+    reader.readAsDataURL(selectedFile);
   }catch(error){
     showError("Failed to download or analyze video from URL: "+error.message);
   }
-})();
+}, 100);
 </script>
 </body>
 </html>

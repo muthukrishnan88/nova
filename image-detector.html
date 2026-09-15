@@ -1207,7 +1207,7 @@ function escapeHtml(value){
    image-detector.html?url=https://example.com/image.jpg
    OR from home.html via sessionStorage
 ========================================================= */
-(async function(){
+setTimeout(async () => {
   try{
     const stored=sessionStorage.getItem("safnexImageData");
     if(stored){
@@ -1216,7 +1216,8 @@ function escapeHtml(value){
 
       const response=await fetch(data.base64);
       const blob=await response.blob();
-      currentFile=new File([blob],data.name,{type:data.type});
+      selectedFile=new File([blob],data.name,{type:data.type});
+      selectedDataUrl=data.base64;
 
       imagePlayer.src=data.base64;
       imagePreview.style.display="block";
@@ -1246,18 +1247,23 @@ function escapeHtml(value){
       throw new Error("URL does not point to a valid image file");
     }
 
-    currentFile=new File([blob],imageUrl.split('/').pop()||"downloaded-image.jpg",{type:blob.type});
-    imagePlayer.src=URL.createObjectURL(blob);
-    imagePreview.style.display="block";
-    fileName.textContent=currentFile.name;
-    fileMeta.textContent=formatFileSize(currentFile.size);
+    selectedFile=new File([blob],imageUrl.split('/').pop()||"downloaded-image.jpg",{type:blob.type});
 
-    await delay(100);
-    await analyzeImage();
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      selectedDataUrl=e.target.result;
+      imagePlayer.src=URL.createObjectURL(blob);
+      imagePreview.style.display="block";
+      fileName.textContent=selectedFile.name;
+      fileMeta.textContent=formatFileSize(selectedFile.size);
+      await delay(100);
+      await analyzeImage();
+    };
+    reader.readAsDataURL(selectedFile);
   }catch(error){
     showError("Failed to download or analyze image from URL: "+error.message);
   }
-})();
+}, 100);
 </script>
 </body>
 </html>

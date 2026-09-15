@@ -19,7 +19,7 @@ app.use(cors());
 
 app.use(
     express.json({
-        limit: "12mb"
+        limit: "600mb"
     })
 );
 
@@ -3030,8 +3030,8 @@ async function analyzeVideo(videoBase64, fileName, mimeType, size) {
         const fileSize = buffer.length;
 
         // Safety check
-        if (fileSize > 100 * 1024 * 1024) {
-            throw new Error("Video file too large for analysis");
+        if (fileSize > 500 * 1024 * 1024) {
+            throw new Error("Video file too large for analysis (max 500 MB)");
         }
 
         const indicators = [];
@@ -3389,10 +3389,10 @@ app.post(
             }
 
             // Check file size before processing
-            if (size && size > 100 * 1024 * 1024) {
+            if (size && size > 500 * 1024 * 1024) {
                 return res.status(400).json({
                     ok: false,
-                    error: "Video file too large (max 100 MB)"
+                    error: "Video file too large (max 500 MB)"
                 });
             }
 

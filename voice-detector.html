@@ -1219,7 +1219,7 @@ function escapeHtml(value){
    voice-detector.html?url=https://example.com/audio.mp3
    OR from home.html via sessionStorage
 ========================================================= */
-(async function(){
+setTimeout(async () => {
   try{
     const stored=sessionStorage.getItem("safnexAudioData");
     if(stored){
@@ -1229,6 +1229,7 @@ function escapeHtml(value){
       const response=await fetch(data.base64);
       const blob=await response.blob();
       selectedFile=new File([blob],data.name,{type:data.type});
+      selectedDataUrl=data.base64;
 
       audioPlayer.src=data.base64;
       audioPreview.style.display="block";
@@ -1260,17 +1261,22 @@ function escapeHtml(value){
 
     selectedFile=new File([blob],audioUrl.split('/').pop()||"downloaded-audio.mp3",{type:blob.type});
     const objectUrl=URL.createObjectURL(blob);
-    audioPlayer.src=objectUrl;
-    audioPreview.style.display="block";
-    fileName.textContent=selectedFile.name;
-    fileMeta.textContent=formatFileSize(selectedFile.size);
 
-    await delay(100);
-    await analyzeVoice();
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      selectedDataUrl=e.target.result;
+      audioPlayer.src=objectUrl;
+      audioPreview.style.display="block";
+      fileName.textContent=selectedFile.name;
+      fileMeta.textContent=formatFileSize(selectedFile.size);
+      await delay(100);
+      await analyzeVoice();
+    };
+    reader.readAsDataURL(selectedFile);
   }catch(error){
     showError("Failed to download or analyze audio from URL: "+error.message);
   }
-})();
+}, 100);
 </script>
 </body>
 </html>

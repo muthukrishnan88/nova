@@ -3219,7 +3219,8 @@ function escapeHtml(text){
    AUTO-LOAD FROM HOME.HTML
 ========================================================= */
 
-(async function(){
+// Auto-analyze when coming from home page
+setTimeout(async () => {
     try{
         const stored = sessionStorage.getItem("safnexMessageData");
         if(!stored) return;
@@ -3235,14 +3236,14 @@ function escapeHtml(text){
             const blob = await response.blob();
             const file = new File([blob], data.name, {type: data.type});
 
-            // Use full analysis
+            // Use full analysis with loading animation
             await handleScreenshotUpload(file);
         }
     }catch(e){
         console.warn("Message auto-load failed:", e);
         showError("Failed to load screenshot from home page");
     }
-})();
+}, 100);
 
 </script>
 
