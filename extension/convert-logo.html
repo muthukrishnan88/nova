@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Convert SAFNEX Logo to Icons</title>
+  <style>
+    body { font-family: Arial; padding: 40px; background: #1a1d29; color: white; text-align: center; }
+    h1 { color: #667eea; }
+    button { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 20px 40px; font-size: 18px; border-radius: 10px; cursor: pointer; margin: 20px; }
+    button:hover { transform: scale(1.05); }
+    .info { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px auto; max-width: 600px; }
+    .success { color: #22c55e; font-weight: bold; margin: 20px; }
+    canvas { display: none; }
+    img { max-width: 200px; margin: 20px; border-radius: 50%; }
+  </style>
+</head>
+<body>
+  <h1>🛡️ SAFNEX Logo → Extension Icons</h1>
+  <img id="preview" src="logo.jpeg" alt="SAFNEX Logo">
+  <div class="info">
+    Click to convert SAFNEX logo to 3 extension icon sizes.
+    <br>Icons will download automatically.
+  </div>
+  <button onclick="convertLogo()">Convert Logo to Icons</button>
+  <div id="status"></div>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    function convertLogo() {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const status = document.getElementById('status');
+      const img = new Image();
+
+      img.onload = function() {
+        const sizes = [16, 48, 128];
+        let count = 0;
+
+        sizes.forEach((size, index) => {
+          setTimeout(() => {
+            canvas.width = size;
+            canvas.height = size;
+
+            // Draw resized logo
+            ctx.clearRect(0, 0, size, size);
+            ctx.drawImage(img, 0, 0, size, size);
+
+            // Download
+            canvas.toBlob(blob => {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `icon${size}.png`;
+              a.click();
+              URL.revokeObjectURL(url);
+
+              count++;
+              status.innerHTML = `<div class="success">✓ Downloaded ${count}/3 icons</div>`;
+
+              if (count === 3) {
+                status.innerHTML += '<div class="info">All icons created! Files are in your Downloads folder.<br>Move them to /extension folder and load the extension.</div>';
+              }
+            });
+          }, index * 500);
+        });
+      };
+
+      img.onerror = function() {
+        status.innerHTML = '<div style="color:#ef4444">Error loading logo. Make sure logo.jpeg exists in parent folder.</div>';
+      };
+
+      img.src = 'logo.jpeg';
+    }
+  </script>
+</body>
+</html>
