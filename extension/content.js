@@ -176,7 +176,9 @@ function showSafnexPopup(url, result) {
     const targetUrl = primaryBtn.getAttribute('data-url');
 
     primaryBtn.addEventListener('click', () => {
-      if (action === 'visit' || action === 'open-safnex') {
+      if (action === 'visit') {
+        window.location.href = targetUrl;
+      } else if (action === 'open-safnex') {
         window.open(`https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(targetUrl)}`, '_blank');
       }
     });
