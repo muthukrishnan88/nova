@@ -337,12 +337,29 @@ body {
 </footer>
 
 <script>
+// Check if mobile
+function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
 // Check if extension installed
 function checkExtension() {
     const installed = document.documentElement.hasAttribute('data-safnex-installed');
     const banner = document.getElementById('statusBanner');
     const text = document.getElementById('statusText');
     const btn = document.getElementById('downloadBtn');
+
+    // Handle mobile
+    if (isMobile()) {
+        banner.style.background = 'rgba(251,146,60,0.15)';
+        banner.style.borderColor = 'rgba(251,146,60,0.3)';
+        text.textContent = '📱 Mobile Device - Use Online Scanner';
+        btn.innerHTML = '<span>📱</span><span>Use Mobile Scanner</span>';
+        btn.onclick = function() {
+            window.location.href = 'home.html';
+        };
+        return;
+    }
 
     if (installed) {
         banner.classList.add('installed');
