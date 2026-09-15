@@ -102,7 +102,7 @@ function showSafnexPopup(url, result) {
           <p class="safnex-url">${escapeHtml(url)}</p>
           <div class="safnex-actions">
             <button class="safnex-btn safnex-btn-secondary" data-action="cancel">Cancel</button>
-            <button class="safnex-btn safnex-btn-primary" data-action="visit" data-url="${escapeHtml(url)}">Visit Anyway</button>
+            <button class="safnex-btn safnex-btn-primary" data-action="visit" data-url="${url}">Visit Anyway</button>
           </div>
         </div>
       </div>
@@ -148,9 +148,9 @@ function showSafnexPopup(url, result) {
           ${reasonsHtml}
           <div class="safnex-actions">
             <button class="safnex-btn safnex-btn-secondary" data-action="cancel">Cancel</button>
-            <button class="safnex-btn safnex-btn-primary" data-action="${actionType}" data-url="${escapeHtml(url)}">${primaryLabel}</button>
+            <button class="safnex-btn safnex-btn-primary" data-action="${actionType}" data-url="${url}">${primaryLabel}</button>
           </div>
-          <a href="https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(url)}" target="_blank" class="safnex-full-report">View Full Report →</a>
+          <a class="safnex-full-report" data-url="${url}">View Full Report →</a>
         </div>
       </div>
     `;
@@ -179,6 +179,15 @@ function showSafnexPopup(url, result) {
       if (action === 'visit' || action === 'open-safnex') {
         window.open(`https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(targetUrl)}`, '_blank');
       }
+    });
+  }
+
+  const fullReportLink = overlay.querySelector('.safnex-full-report');
+  if (fullReportLink) {
+    const targetUrl = fullReportLink.getAttribute('data-url');
+    fullReportLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.open(`https://safnex-nova.onrender.com/link-detector.html?url=${encodeURIComponent(targetUrl)}`, '_blank');
     });
   }
 }

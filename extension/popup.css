@@ -213,6 +213,7 @@
   color: #667eea;
   text-decoration: none;
   transition: color 0.2s;
+  cursor: pointer;
 }
 
 .safnex-full-report:hover {
