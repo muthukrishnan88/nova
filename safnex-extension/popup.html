@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>SAFNEX NOVA</title>
+
+  <style>
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+
+    body {
+
+      width: 350px;
+
+      min-height: 400px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 100%
+        );
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      padding: 20px;
+
+    }
+
+
+    .container {
+
+      background: #ffffff;
+
+      border-radius: 16px;
+
+      padding: 24px;
+
+      box-shadow:
+        0 15px 40px
+        rgba(0, 0, 0, 0.25);
+
+    }
+
+
+    .logo {
+
+      width: 70px;
+
+      height: 70px;
+
+      margin: 0 auto 12px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      border-radius: 50%;
+
+      overflow: hidden;
+
+      background: #ffffff;
+
+    }
+
+
+    .logo img {
+
+      width: 100%;
+
+      height: 100%;
+
+      object-fit: contain;
+
+    }
+
+
+    .logo-fallback {
+
+      font-size: 40px;
+
+    }
+
+
+    h1 {
+
+      font-size: 19px;
+
+      text-align: center;
+
+      color: #111827;
+
+      margin-bottom: 6px;
+
+      font-weight: 800;
+
+    }
+
+
+    .subtitle {
+
+      font-size: 13px;
+
+      text-align: center;
+
+      color: #6b7280;
+
+      margin-bottom: 20px;
+
+    }
+
+
+    .status {
+
+      background: #f0fdf4;
+
+      border: 1px solid #86efac;
+
+      padding: 13px;
+
+      border-radius: 10px;
+
+      text-align: center;
+
+      margin-bottom: 16px;
+
+    }
+
+
+    .status-icon {
+
+      font-size: 21px;
+
+      margin-bottom: 4px;
+
+      color: #16a34a;
+
+    }
+
+
+    .status-text {
+
+      font-size: 13px;
+
+      color: #166534;
+
+      font-weight: 700;
+
+    }
+
+
+    button {
+
+      font-family: inherit;
+
+    }
+
+
+    .action-btn {
+
+      width: 100%;
+
+      padding: 13px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 100%
+        );
+
+      color: #ffffff;
+
+      border: none;
+
+      border-radius: 9px;
+
+      font-size: 14px;
+
+      font-weight: 700;
+
+      cursor: pointer;
+
+      margin-bottom: 9px;
+
+      transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+
+    }
+
+
+    .action-btn:hover {
+
+      transform: translateY(-2px);
+
+      box-shadow:
+        0 7px 18px
+        rgba(102, 126, 234, 0.35);
+
+    }
+
+
+    .settings-btn {
+
+      width: 100%;
+
+      padding: 11px;
+
+      background: transparent;
+
+      color: #6b7280;
+
+      border: 1px solid #e5e7eb;
+
+      border-radius: 9px;
+
+      font-size: 13px;
+
+      font-weight: 600;
+
+      cursor: pointer;
+
+      transition: 0.2s;
+
+    }
+
+
+    .settings-btn:hover {
+
+      background: #f9fafb;
+
+      color: #374151;
+
+    }
+
+
+    .footer {
+
+      text-align: center;
+
+      font-size: 11px;
+
+      color: #9ca3af;
+
+      margin-top: 17px;
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+  <div class="container">
+
+
+    <div class="logo">
+
+      <img
+        src="icon128.png"
+        alt="SAFNEX NOVA"
+      >
+
+    </div>
+
+
+    <h1>
+      SAFNEX NOVA
+    </h1>
+
+
+    <div class="subtitle">
+      Link Guard Extension
+    </div>
+
+
+    <div class="status">
+
+      <div class="status-icon">
+        ✓
+      </div>
+
+      <div class="status-text">
+        Protection Active
+      </div>
+
+    </div>
+
+
+    <button
+      id="openDashboard"
+      class="action-btn"
+      type="button"
+    >
+      Open SAFNEX NOVA
+    </button>
+
+
+    <button
+      id="openSettings"
+      class="settings-btn"
+      type="button"
+    >
+      Extension Settings
+    </button>
+
+
+    <div class="footer">
+      v1.0.2 | Protected by SAFNEX NOVA
+    </div>
+
+
+  </div>
+
+
+  <script src="popup.js"></script>
+
+</body>
+
+</html>
