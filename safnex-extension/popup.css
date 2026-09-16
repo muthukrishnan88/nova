@@ -139,19 +139,17 @@
 
 
 .safnex-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  font-size:
-    16px;
-
-  font-weight:
-    800;
-
-  color:
-    #ffffff;
-
-  letter-spacing:
-    0.4px;
-
+.safnex-logo img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #ffffff;
 }
 
 
