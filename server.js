@@ -1026,9 +1026,1050 @@ function detectBrandImpersonation(
     return detected;
 }
 
-function detectNonProductionDomain(
-    url
+/* =========================================================
+   ADVANCED LINK SECURITY ENGINE
+   SAFNEX NOVA
+   Drop-in replacement - LINK DETECTION ONLY
+========================================================= */
+
+function detectBrandImpersonation(hostname) {
+    const host = String(hostname || "").toLowerCase();
+
+    const labels = host
+        .split(".")
+        .filter(Boolean);
+
+    const root = getRootDomain(host);
+
+    const detected = [];
+
+    for (const brand of Object.keys(BRANDS)) {
+        const officialDomains = BRANDS[brand];
+
+        const isOfficial = officialDomains.some(
+            domain =>
+                host === domain ||
+                host.endsWith("." + domain)
+        );
+
+        if (isOfficial) {
+            continue;
+        }
+
+        const mentioned = labels.some(label =>
+            label === brand ||
+            label.includes(brand)
+        );
+
+        if (mentioned) {
+            detected.push({
+                brand,
+                rootDomain: root,
+                hostname: host,
+                reason:
+                    `The hostname contains "${brand}" but is not an official ${brand} domain.`
+            });
+        }
+    }
+
+    return detected;
+}
+
+
+/* =========================================================
+   LEVENSHTEIN DISTANCE
+========================================================= */
+
+function levenshteinDistance(a, b) {
+    a = String(a || "").toLowerCase();
+    b = String(b || "").toLowerCase();
+
+    if (a === b) return 0;
+
+    if (!a.length) return b.length;
+    if (!b.length) return a.length;
+
+    const matrix = [];
+
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] =
+                    matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] =
+                    Math.min(
+                        matrix[i - 1][j - 1] + 1,
+                        matrix[i][j - 1] + 1,
+                        matrix[i - 1][j] + 1
+                    );
+            }
+        }
+    }
+
+    return matrix[b.length][a.length];
+}
+
+
+/* =========================================================
+   TYPOSQUATTING DETECTION
+========================================================= */
+
+function detectTyposquatting(hostname) {
+    const host =
+        String(hostname || "").toLowerCase();
+
+    const root =
+        getRootDomain(host);
+
+    const rootParts =
+        root.split(".");
+
+    const mainName =
+        rootParts.length >= 2
+            ? rootParts[rootParts.length - 2]
+            : root;
+
+    const results = [];
+
+    for (const brand of Object.keys(BRANDS)) {
+        const officialDomains =
+            BRANDS[brand];
+
+        const official =
+            officialDomains.some(
+                domain =>
+                    host === domain ||
+                    host.endsWith("." + domain)
+            );
+
+        if (official) {
+            continue;
+        }
+
+        const distance =
+            levenshteinDistance(
+                mainName,
+                brand
+            );
+
+        const normalizedMain =
+            mainName
+                .replace(/[-_.]/g, "");
+
+        const normalizedBrand =
+            brand
+                .replace(/[-_.]/g, "");
+
+        const normalizedDistance =
+            levenshteinDistance(
+                normalizedMain,
+                normalizedBrand
+            );
+
+        const containsBrand =
+            normalizedMain.includes(
+                normalizedBrand
+            ) ||
+            normalizedBrand.includes(
+                normalizedMain
+            );
+
+        if (
+            distance <= 2 ||
+            normalizedDistance <= 2
+        ) {
+            results.push({
+                brand,
+                rootDomain: root,
+                distance:
+                    Math.min(
+                        distance,
+                        normalizedDistance
+                    ),
+                reason:
+                    `The registered domain "${root}" is very similar to the official ${brand} domain.`
+            });
+
+            continue;
+        }
+
+        if (
+            containsBrand &&
+            mainName !== brand
+        ) {
+            results.push({
+                brand,
+                rootDomain: root,
+                distance:
+                    Math.min(
+                        distance,
+                        normalizedDistance
+                    ),
+                reason:
+                    `The domain "${root}" contains a look-alike form of the ${brand} name.`
+            });
+        }
+    }
+
+    return results;
+}
+
+
+/* =========================================================
+   HOMOGRAPH / PUNYCODE DETECTION
+========================================================= */
+
+function detectHomographAttack(url) {
+    const hostname =
+        String(url?.hostname || "");
+
+    const lower =
+        hostname.toLowerCase();
+
+    const indicators = [];
+
+    if (
+        lower.includes("xn--")
+    ) {
+        indicators.push(
+            "Punycode/IDN hostname detected. Internationalized domains can be used for look-alike attacks."
+        );
+    }
+
+    const unicodeChars =
+        hostname.match(
+            /[^\x00-\x7F]/g
+        );
+
+    if (
+        unicodeChars &&
+        unicodeChars.length
+    ) {
+        indicators.push(
+            `Unicode hostname characters detected (${unicodeChars.length}).`
+        );
+    }
+
+    return indicators;
+}
+
+
+/* =========================================================
+   SUSPICIOUS TLD DETECTION
+========================================================= */
+
+function detectSuspiciousTLD(hostname) {
+    const host =
+        String(hostname || "")
+            .toLowerCase();
+
+    const parts =
+        host.split(".")
+            .filter(Boolean);
+
+    const tld =
+        parts.length
+            ? parts[parts.length - 1]
+            : "";
+
+    const suspiciousTLDs = [
+        "zip",
+        "mov",
+        "click",
+        "top",
+        "xyz",
+        "shop",
+        "online",
+        "site",
+        "live",
+        "icu",
+        "buzz",
+        "monster",
+        "work",
+        "support",
+        "help",
+        "cam",
+        "rest",
+        "fit",
+        "loan",
+        "download",
+        "stream",
+        "win",
+        "tk",
+        "ml",
+        "ga",
+        "cf",
+        "gq"
+    ];
+
+    return {
+        tld,
+        suspicious:
+            suspiciousTLDs.includes(tld)
+    };
+}
+
+
+/* =========================================================
+   HOSTNAME STRUCTURE ANALYSIS
+========================================================= */
+
+function analyzeHostnameStructure(url) {
+    const hostname =
+        String(url?.hostname || "")
+            .toLowerCase();
+
+    const labels =
+        hostname
+            .split(".")
+            .filter(Boolean);
+
+    const findings = [];
+
+    if (
+        labels.length >= 5
+    ) {
+        findings.push({
+            title:
+                "Very deep subdomain structure",
+            detail:
+                `The hostname contains ${labels.length} labels.`,
+            points: 8
+        });
+    }
+
+    if (
+        hostname.length > 70
+    ) {
+        findings.push({
+            title:
+                "Unusually long hostname",
+            detail:
+                `Hostname length is ${hostname.length} characters.`,
+            points: 7
+        });
+    }
+
+    const hyphenCount =
+        (
+            hostname.match(/-/g) || []
+        ).length;
+
+    if (
+        hyphenCount >= 4
+    ) {
+        findings.push({
+            title:
+                "Many hyphens in hostname",
+            detail:
+                `The hostname contains ${hyphenCount} hyphens.`,
+            points: 7
+        });
+    }
+
+    const digitCount =
+        (
+            hostname.match(/[0-9]/g) || []
+        ).length;
+
+    if (
+        digitCount >= 5
+    ) {
+        findings.push({
+            title:
+                "Unusual number of digits",
+            detail:
+                `The hostname contains ${digitCount} numeric characters.`,
+            points: 7
+        });
+    }
+
+    return findings;
+}
+
+
+/* =========================================================
+   SUSPICIOUS URL STRUCTURE
+========================================================= */
+
+function analyzeURLStructure(url) {
+    const findings = [];
+
+    const full =
+        String(url?.href || "");
+
+    const pathname =
+        String(url?.pathname || "");
+
+    const search =
+        String(url?.search || "");
+
+    if (
+        full.length > 180
+    ) {
+        findings.push({
+            title:
+                "Very long URL",
+            detail:
+                `The complete URL contains ${full.length} characters.`,
+            points: 8
+        });
+    }
+
+    if (
+        pathname.length > 100
+    ) {
+        findings.push({
+            title:
+                "Long URL path",
+            detail:
+                "The URL contains an unusually long path.",
+            points: 5
+        });
+    }
+
+    const suspiciousWords = [
+        "verify",
+        "verification",
+        "validate",
+        "confirm",
+        "account",
+        "secure",
+        "security",
+        "login",
+        "signin",
+        "sign-in",
+        "password",
+        "passwd",
+        "credential",
+        "otp",
+        "2fa",
+        "payment",
+        "billing",
+        "invoice",
+        "refund",
+        "wallet",
+        "bank",
+        "crypto",
+        "claim",
+        "prize",
+        "winner",
+        "reward",
+        "gift",
+        "urgent",
+        "suspended",
+        "blocked",
+        "unlock"
+    ];
+
+    const lower =
+        full.toLowerCase();
+
+    const hits =
+        unique(
+            suspiciousWords.filter(
+                word =>
+                    lower.includes(word)
+            )
+        );
+
+    if (
+        hits.length >= 3
+    ) {
+        findings.push({
+            title:
+                "Multiple high-risk URL keywords",
+            detail:
+                `Detected: ${hits.join(", ")}.`,
+            points: 15
+        });
+    }
+
+    const encodedCount =
+        (
+            full.match(/%[0-9a-f]{2}/gi) || []
+        ).length;
+
+    if (
+        encodedCount >= 8
+    ) {
+        findings.push({
+            title:
+                "Heavy URL encoding",
+            detail:
+                `The URL contains ${encodedCount} encoded characters.`,
+            points: 8
+        });
+    }
+
+    if (
+        search.length > 120
+    ) {
+        findings.push({
+            title:
+                "Large query string",
+            detail:
+                "The URL contains an unusually large query string.",
+            points: 5
+        });
+    }
+
+    return findings;
+}
+
+
+/* =========================================================
+   REDIRECT / DESTINATION ANALYSIS
+========================================================= */
+
+function analyzeDestinationChange(
+    originalUrl,
+    finalUrl
 ) {
+    const findings = [];
+
+    if (
+        !finalUrl
+    ) {
+        return findings;
+    }
+
+    try {
+        const original =
+            new URL(originalUrl);
+
+        const final =
+            new URL(finalUrl);
+
+        const originalRoot =
+            getRootDomain(
+                original.hostname
+            );
+
+        const finalRoot =
+            getRootDomain(
+                final.hostname
+            );
+
+        if (
+            originalRoot !== finalRoot
+        ) {
+            findings.push({
+                title:
+                    "Cross-domain redirect",
+                detail:
+                    `The URL changed from ${originalRoot} to ${finalRoot}.`,
+                points: 15,
+                originalRoot,
+                finalRoot
+            });
+        }
+
+        if (
+            original.protocol === "https:" &&
+            final.protocol === "http:"
+        ) {
+            findings.push({
+                title:
+                    "Redirect downgraded HTTPS",
+                detail:
+                    "The final destination uses HTTP instead of HTTPS.",
+                points: 18
+            });
+        }
+
+        if (
+            original.hostname !==
+            final.hostname
+        ) {
+            findings.push({
+                title:
+                    "Hostname changed after navigation",
+                detail:
+                    `Final hostname: ${final.hostname}.`,
+                points: 8
+            });
+        }
+
+    } catch {
+        // Ignore malformed destination.
+    }
+
+    return findings;
+}
+
+
+/* =========================================================
+   PAGE CONTENT SECURITY ANALYSIS
+========================================================= */
+
+function analyzeWebsiteContent(
+    fetchResult,
+    originalUrl
+) {
+    const findings = [];
+
+    const html =
+        String(
+            fetchResult?.body || ""
+        );
+
+    if (!html) {
+        return findings;
+    }
+
+    const lower =
+        html.toLowerCase();
+
+    /* -------------------------
+       Password / Login forms
+    ------------------------- */
+
+    const passwordInputs =
+        (
+            lower.match(
+                /type\s*=\s*["']password["']/g
+            ) || []
+        ).length;
+
+    const forms =
+        (
+            lower.match(/<form\b/g) || []
+        ).length;
+
+    const loginWords = [
+        "login",
+        "log in",
+        "sign in",
+        "signin",
+        "password",
+        "username",
+        "credential",
+        "account verification"
+    ];
+
+    const loginHits =
+        unique(
+            loginWords.filter(
+                word =>
+                    lower.includes(word)
+            )
+        );
+
+    if (
+        passwordInputs > 0
+    ) {
+        findings.push({
+            title:
+                "Password input detected",
+            detail:
+                `The page contains ${passwordInputs} password input field(s).`,
+            points: 10
+        });
+    }
+
+    if (
+        forms > 0 &&
+        loginHits.length >= 2
+    ) {
+        findings.push({
+            title:
+                "Login/account form detected",
+            detail:
+                `Login-related indicators: ${loginHits.join(", ")}.`,
+            points: 12
+        });
+    }
+
+    /* -------------------------
+       OTP / verification
+    ------------------------- */
+
+    const otpWords = [
+        "otp",
+        "one time password",
+        "verification code",
+        "security code",
+        "authentication code"
+    ];
+
+    const otpHits =
+        otpWords.filter(
+            word =>
+                lower.includes(word)
+        );
+
+    if (
+        otpHits.length
+    ) {
+        findings.push({
+            title:
+                "OTP/security-code request detected",
+            detail:
+                `Detected: ${otpHits.join(", ")}.`,
+            points: 14
+        });
+    }
+
+    /* -------------------------
+       Payment
+    ------------------------- */
+
+    const paymentWords = [
+        "credit card",
+        "debit card",
+        "card number",
+        "cvv",
+        "cvc",
+        "expiry",
+        "expiration",
+        "bank account",
+        "payment",
+        "billing",
+        "wallet"
+    ];
+
+    const paymentHits =
+        unique(
+            paymentWords.filter(
+                word =>
+                    lower.includes(word)
+            )
+        );
+
+    if (
+        paymentHits.length >= 2
+    ) {
+        findings.push({
+            title:
+                "Payment information requested",
+            detail:
+                `Payment indicators: ${paymentHits.join(", ")}.`,
+            points: 14
+        });
+    }
+
+    /* -------------------------
+       Urgency / social engineering
+    ------------------------- */
+
+    const urgencyWords = [
+        "urgent",
+        "immediately",
+        "act now",
+        "limited time",
+        "account suspended",
+        "account will be closed",
+        "verify now",
+        "confirm now",
+        "security alert",
+        "unusual activity",
+        "your account is blocked"
+    ];
+
+    const urgencyHits =
+        unique(
+            urgencyWords.filter(
+                word =>
+                    lower.includes(word)
+            )
+        );
+
+    if (
+        urgencyHits.length >= 2
+    ) {
+        findings.push({
+            title:
+                "Social-engineering language detected",
+            detail:
+                `Urgency indicators: ${urgencyHits.join(", ")}.`,
+            points: 12
+        });
+    }
+
+    /* -------------------------
+       External form actions
+    ------------------------- */
+
+    const actionMatches =
+        [
+            ...html.matchAll(
+                /<form[^>]*action\s*=\s*["']([^"']+)["']/gi
+            )
+        ];
+
+    for (
+        const match
+        of actionMatches
+    ) {
+        try {
+            const action =
+                new URL(
+                    match[1],
+                    originalUrl
+                );
+
+            const original =
+                new URL(
+                    originalUrl
+                );
+
+            const originalRoot =
+                getRootDomain(
+                    original.hostname
+                );
+
+            const actionRoot =
+                getRootDomain(
+                    action.hostname
+                );
+
+            if (
+                originalRoot !==
+                actionRoot
+            ) {
+                findings.push({
+                    title:
+                        "Form submits to another domain",
+                    detail:
+                        `Form action points to ${action.hostname}.`,
+                    points: 18
+                });
+
+                break;
+            }
+        } catch {
+            // Ignore malformed form action.
+        }
+    }
+
+    /* -------------------------
+       Iframes
+    ------------------------- */
+
+    const iframeCount =
+        (
+            lower.match(/<iframe\b/g) || []
+        ).length;
+
+    if (
+        iframeCount >= 3
+    ) {
+        findings.push({
+            title:
+                "Multiple embedded frames",
+            detail:
+                `The page contains ${iframeCount} iframe elements.`,
+            points: 5
+        });
+    }
+
+    /* -------------------------
+       Obfuscated JavaScript
+    ------------------------- */
+
+    const evalCount =
+        (
+            lower.match(
+                /\beval\s*\(/g
+            ) || []
+        ).length;
+
+    const encodedScriptCount =
+        (
+            lower.match(
+                /fromcharcode|atob\s*\(|unescape\s*\(/g
+            ) || []
+        ).length;
+
+    if (
+        evalCount > 0 ||
+        encodedScriptCount >= 2
+    ) {
+        findings.push({
+            title:
+                "Potentially obfuscated JavaScript",
+            detail:
+                "The page contains JavaScript patterns commonly associated with obfuscation.",
+            points: 10
+        });
+    }
+
+    return findings;
+}
+
+
+/* =========================================================
+   BRAND / WEBSITE CONTENT CONSISTENCY
+========================================================= */
+
+function analyzeBrandConsistency(
+    url,
+    fetchResult
+) {
+    const findings = [];
+
+    if (!fetchResult?.body) {
+        return findings;
+    }
+
+    const root =
+        getRootDomain(
+            url.hostname
+        );
+
+    const pageText =
+        stripHtml(
+            fetchResult.body
+        )
+        .slice(0, 50000)
+        .toLowerCase();
+
+    for (
+        const brand
+        of Object.keys(BRANDS)
+    ) {
+        const official =
+            BRANDS[brand].some(
+                domain =>
+                    url.hostname === domain ||
+                    url.hostname.endsWith(
+                        "." + domain
+                    )
+            );
+
+        if (official) {
+            continue;
+        }
+
+        const brandMentioned =
+            pageText.includes(
+                brand
+            );
+
+        if (
+            brandMentioned
+        ) {
+            findings.push({
+                title:
+                    "Brand/domain mismatch",
+                detail:
+                    `The page mentions ${brand}, but the website domain is ${root}.`,
+                points: 20,
+                brand,
+                domain: root
+            });
+        }
+    }
+
+    return findings;
+}
+
+
+/* =========================================================
+   IP / HOSTNAME DETECTION
+========================================================= */
+
+function isIPAddress(hostname) {
+    return (
+        net.isIP(
+            String(hostname || "")
+        ) !== 0
+    );
+}
+
+
+/* =========================================================
+   RANDOM / HIGH-ENTROPY DOMAIN CHECK
+========================================================= */
+
+function calculateStringEntropy(value) {
+    const text =
+        String(value || "");
+
+    if (!text.length) {
+        return 0;
+    }
+
+    const counts = {};
+
+    for (
+        const char
+        of text
+    ) {
+        counts[char] =
+            (counts[char] || 0) + 1;
+    }
+
+    let entropy = 0;
+
+    for (
+        const count
+        of Object.values(counts)
+    ) {
+        const probability =
+            count / text.length;
+
+        entropy -=
+            probability *
+            Math.log2(
+                probability
+            );
+    }
+
+    return entropy;
+}
+
+function detectRandomDomain(hostname) {
+    const root =
+        getRootDomain(
+            hostname
+        );
+
+    const label =
+        root
+            .split(".")
+            .slice(-2, -1)[0] ||
+            root;
+
+    const entropy =
+        calculateStringEntropy(
+            label
+        );
+
+    const manyDigits =
+        (
+            label.match(/[0-9]/g) || []
+        ).length >= 3;
+
+    const longRandom =
+        label.length >= 16 &&
+        entropy >= 3.5;
+
+    return {
+        suspicious:
+            manyDigits ||
+            longRandom,
+        entropy,
+        label
+    };
+}
+
+
+/* =========================================================
+   NON-PRODUCTION DOMAIN
+========================================================= */
+
+function detectNonProductionDomain(url) {
     const labels =
         url.hostname
             .toLowerCase()
@@ -1062,9 +2103,12 @@ function detectNonProductionDomain(
     );
 }
 
-function detectPaymentSignals(
-    url
-) {
+
+/* =========================================================
+   PAYMENT / ACCOUNT URL SIGNALS
+========================================================= */
+
+function detectPaymentSignals(url) {
     const text = (
         url.hostname +
         " " +
@@ -1085,7 +2129,9 @@ function detectPaymentSignals(
         "transaction",
         "wallet",
         "bank",
-        "secure-payment"
+        "secure-payment",
+        "cvv",
+        "cvc"
     ];
 
     const accountWords = [
@@ -1096,9 +2142,12 @@ function detectPaymentSignals(
         "verify-payment",
         "credential",
         "password",
+        "passwd",
         "signin",
         "sign-in",
-        "login"
+        "login",
+        "otp",
+        "2fa"
     ];
 
     return {
@@ -1111,6 +2160,7 @@ function detectPaymentSignals(
                         )
                 )
             ),
+
         accountHits:
             unique(
                 accountWords.filter(
@@ -1123,11 +2173,17 @@ function detectPaymentSignals(
     };
 }
 
-function detectKnownPhishingCampaign(
-    url
-) {
+
+/* =========================================================
+   KNOWN PHISHING PATTERN DETECTION
+========================================================= */
+
+function detectKnownPhishingCampaign(url) {
     const host =
         url.hostname.toLowerCase();
+
+    const full =
+        url.href.toLowerCase();
 
     const matches = [];
 
@@ -1138,10 +2194,10 @@ function detectKnownPhishingCampaign(
         matches.push({
             type: "critical",
             title:
-                "Known phishing domain",
+                "Known phishing domain pattern",
             detail:
                 "This hostname matches a known fake Google Forms phishing pattern.",
-            points: 45
+            points: 55
         });
     }
 
@@ -1156,12 +2212,47 @@ function detectKnownPhishingCampaign(
                 "Google brand impersonation",
             detail:
                 `The hostname contains "google", but the registered root domain is ${getRootDomain(host)}.`,
-            points: 28
+            points: 35
+        });
+    }
+
+    if (
+        /paypal[^.]*\.(?!paypal\.com)/i.test(
+            host
+        )
+    ) {
+        matches.push({
+            type: "critical",
+            title:
+                "Possible PayPal impersonation",
+            detail:
+                "The hostname resembles PayPal but is not an official PayPal domain.",
+            points: 30
+        });
+    }
+
+    if (
+        full.includes(
+            "login.microsoftonline.com."
+        )
+    ) {
+        matches.push({
+            type: "critical",
+            title:
+                "Microsoft login look-alike",
+            detail:
+                "The URL contains a suspicious Microsoft login hostname pattern.",
+            points: 35
         });
     }
 
     return matches;
 }
+
+
+/* =========================================================
+   ADVANCED SECURITY ANALYSIS
+========================================================= */
 
 function analyzeSecurity(
     rawUrl,
@@ -1179,21 +2270,43 @@ function analyzeSecurity(
 
     let riskPoints = 0;
 
+    let criticalCount = 0;
+
     function add(
         type,
         title,
         detail,
         points
     ) {
+        const safePoints =
+            Math.max(
+                0,
+                Number(points) || 0
+            );
+
         indicators.push({
             type,
             title,
             detail,
-            points
+            points:
+                safePoints
         });
 
-        riskPoints += points;
+        riskPoints +=
+            safePoints;
+
+        if (
+            type === "critical" ||
+            safePoints >= 30
+        ) {
+            criticalCount++;
+        }
     }
+
+
+    /* =====================================================
+       HTTPS
+    ===================================================== */
 
     if (
         url.protocol ===
@@ -1209,33 +2322,172 @@ function analyzeSecurity(
         add(
             "warning",
             "HTTPS is not enabled",
-            "The URL does not use HTTPS.",
+            "The destination does not use HTTPS.",
             18
         );
     }
+
+
+    /* =====================================================
+       USERINFO ATTACK
+    ===================================================== */
 
     if (
         url.username ||
         url.password
     ) {
         add(
-            "danger",
+            "critical",
             "Embedded credentials",
-            "The URL contains username or password information.",
-            30
+            "The URL contains username or password information before the hostname.",
+            35
         );
     }
 
+
+    /* =====================================================
+       @ CHARACTER / CONFUSION
+    ===================================================== */
+
     if (
-        url.hostname.includes("@")
+        rawUrl.includes("@")
     ) {
         add(
             "danger",
-            "Suspicious hostname",
-            "The hostname contains an unusual character.",
+            "URL contains @ character",
+            "The @ character can be used to disguise the actual destination.",
             20
         );
     }
+
+
+    /* =====================================================
+       IP ADDRESS
+    ===================================================== */
+
+    if (
+        isIPAddress(host)
+    ) {
+        add(
+            "warning",
+            "IP address used as destination",
+            `The URL directly targets ${host} instead of a normal domain name.`,
+            15
+        );
+    }
+
+
+    /* =====================================================
+       PUNYCODE / HOMOGRAPH
+    ===================================================== */
+
+    const homograph =
+        detectHomographAttack(
+            url
+        );
+
+    for (
+        const detail
+        of homograph
+    ) {
+        add(
+            "critical",
+            "Possible homograph attack",
+            detail,
+            25
+        );
+    }
+
+
+    /* =====================================================
+       TLD
+    ===================================================== */
+
+    const tld =
+        detectSuspiciousTLD(
+            host
+        );
+
+    if (
+        tld.suspicious
+    ) {
+        add(
+            "warning",
+            "Higher-risk TLD",
+            `The domain uses .${tld.tld}, which is frequently seen in disposable or abuse-prone registrations.`,
+            8
+        );
+    }
+
+
+    /* =====================================================
+       HOSTNAME STRUCTURE
+    ===================================================== */
+
+    const hostnameFindings =
+        analyzeHostnameStructure(
+            url
+        );
+
+    for (
+        const item
+        of hostnameFindings
+    ) {
+        add(
+            "warning",
+            item.title,
+            item.detail,
+            item.points
+        );
+    }
+
+
+    /* =====================================================
+       URL STRUCTURE
+    ===================================================== */
+
+    const urlFindings =
+        analyzeURLStructure(
+            url
+        );
+
+    for (
+        const item
+        of urlFindings
+    ) {
+        add(
+            "warning",
+            item.title,
+            item.detail,
+            item.points
+        );
+    }
+
+
+    /* =====================================================
+       RANDOM DOMAIN
+    ===================================================== */
+
+    const randomDomain =
+        detectRandomDomain(
+            host
+        );
+
+    if (
+        randomDomain.suspicious
+    ) {
+        add(
+            "warning",
+            "Unusual domain structure",
+            `The domain label "${randomDomain.label}" has unusual randomness/digit characteristics.`,
+            7
+        );
+    }
+
+
+    /* =====================================================
+       NON-PRODUCTION
+    ===================================================== */
 
     const nonProduction =
         detectNonProductionDomain(
@@ -1252,6 +2504,11 @@ function analyzeSecurity(
             10
         );
     }
+
+
+    /* =====================================================
+       PAYMENT / ACCOUNT
+    ===================================================== */
 
     const payment =
         detectPaymentSignals(
@@ -1280,6 +2537,11 @@ function analyzeSecurity(
         );
     }
 
+
+    /* =====================================================
+       BRAND IMPERSONATION
+    ===================================================== */
+
     const impersonation =
         detectBrandImpersonation(
             host
@@ -1292,10 +2554,48 @@ function analyzeSecurity(
         add(
             "critical",
             "Possible brand impersonation",
-            `The hostname appears to imitate ${item.brand}.`,
-            28
+            item.reason,
+            30
         );
     }
+
+
+    /* =====================================================
+       TYPOSQUATTING
+    ===================================================== */
+
+    const typosquatting =
+        detectTyposquatting(
+            host
+        );
+
+    for (
+        const item
+        of typosquatting
+    ) {
+        const alreadyImpersonating =
+            impersonation.some(
+                existing =>
+                    existing.brand ===
+                    item.brand
+            );
+
+        if (
+            !alreadyImpersonating
+        ) {
+            add(
+                "critical",
+                "Possible typosquatting domain",
+                item.reason,
+                28
+            );
+        }
+    }
+
+
+    /* =====================================================
+       KNOWN PHISHING
+    ===================================================== */
 
     const phishing =
         detectKnownPhishingCampaign(
@@ -1314,6 +2614,11 @@ function analyzeSecurity(
         );
     }
 
+
+    /* =====================================================
+       KNOWN SERVICE
+    ===================================================== */
+
     if (
         knownService
     ) {
@@ -1325,18 +2630,124 @@ function analyzeSecurity(
         );
     }
 
+
+    /* =====================================================
+       FINAL DESTINATION
+    ===================================================== */
+
+    if (
+        fetchResult?.finalUrl &&
+        fetchResult.finalUrl !== rawUrl
+    ) {
+        const destinationFindings =
+            analyzeDestinationChange(
+                rawUrl,
+                fetchResult.finalUrl
+            );
+
+        for (
+            const item
+            of destinationFindings
+        ) {
+            add(
+                item.points >= 18
+                    ? "critical"
+                    : "warning",
+                item.title,
+                item.detail,
+                item.points
+            );
+        }
+    }
+
+
+    /* =====================================================
+       WEBSITE CONTENT
+    ===================================================== */
+
+    const websiteFindings =
+        analyzeWebsiteContent(
+            fetchResult,
+            rawUrl
+        );
+
+    for (
+        const item
+        of websiteFindings
+    ) {
+        add(
+            item.points >= 18
+                ? "critical"
+                : "warning",
+            item.title,
+            item.detail,
+            item.points
+        );
+    }
+
+
+    /* =====================================================
+       BRAND / PAGE MISMATCH
+    ===================================================== */
+
+    const brandMismatch =
+        analyzeBrandConsistency(
+            url,
+            fetchResult
+        );
+
+    for (
+        const item
+        of brandMismatch
+    ) {
+        add(
+            "critical",
+            item.title,
+            item.detail,
+            item.points
+        );
+    }
+
+
+    /* =====================================================
+       FETCH FAILURE
+    ===================================================== */
+
     if (
         fetchError
     ) {
         add(
             "warning",
             "Website could not be fully inspected",
-            "The destination could not be fetched for content verification.",
+            "The destination could not be fetched for complete content verification.",
             8
         );
     }
 
-    const score =
+
+    /* =====================================================
+       PRIVATE NETWORK
+    ===================================================== */
+
+    let privateDestination =
+        false;
+
+    try {
+        privateDestination =
+            isBlockedHost(
+                host
+            );
+    } catch {
+        privateDestination =
+            false;
+    }
+
+
+    /* =====================================================
+       SCORE
+    ===================================================== */
+
+    let score =
         Math.max(
             0,
             Math.min(
@@ -1346,6 +2757,57 @@ function analyzeSecurity(
             )
         );
 
+
+    /* =====================================================
+       CRITICAL SIGNAL OVERRIDE
+    ===================================================== */
+
+    if (
+        criticalCount >= 2
+    ) {
+        score =
+            Math.min(
+                score,
+                25
+            );
+    }
+
+    if (
+        phishing.length
+    ) {
+        score =
+            Math.min(
+                score,
+                15
+            );
+    }
+
+    if (
+        impersonation.length &&
+        payment.accountHits.length
+    ) {
+        score =
+            Math.min(
+                score,
+                20
+            );
+    }
+
+    if (
+        privateDestination === true
+    ) {
+        score =
+            Math.min(
+                score,
+                20
+            );
+    }
+
+
+    /* =====================================================
+       VERDICT
+    ===================================================== */
+
     let verdict =
         "Likely Safe";
 
@@ -1353,70 +2815,248 @@ function analyzeSecurity(
         "LOW RISK";
 
     if (
-        score < 40
+        score < 30
     ) {
         verdict =
             "High Risk";
+
         riskLevel =
             "HIGH RISK";
 
     } else if (
-        score < 60
+        score < 55
     ) {
         verdict =
             "Suspicious";
+
         riskLevel =
             "ELEVATED RISK";
 
     } else if (
-        score < 80
+        score < 75
     ) {
         verdict =
             "Review";
+
         riskLevel =
             "MEDIUM RISK";
     }
 
+
+    /* =====================================================
+       CONFIDENCE
+    ===================================================== */
+
     let confidence =
         "Medium";
 
+    const signalCount =
+        indicators.length;
+
     if (
-        knownService &&
-        !impersonation.length
+        criticalCount >= 2 ||
+        phishing.length
+    ) {
+        confidence =
+            "Very High";
+
+    } else if (
+        criticalCount === 1 ||
+        signalCount >= 8
     ) {
         confidence =
             "High";
-    }
 
-    if (
-        fetchError
+    } else if (
+        fetchError &&
+        !knownService
     ) {
         confidence =
             "Low";
     }
 
+
+    /* =====================================================
+       UNKNOWN DESTINATION PROTECTION
+    ===================================================== */
+
+    if (
+        fetchError &&
+        !knownService &&
+        score > 88
+    ) {
+        score = 88;
+
+        verdict =
+            "Unverified";
+
+        riskLevel =
+            "UNVERIFIED";
+
+        confidence =
+            "Low";
+    }
+
+
+    /* =====================================================
+       OFFICIAL SERVICE
+    ===================================================== */
+
+    if (
+        knownService &&
+        knownService.official &&
+        !impersonation.length &&
+        !phishing.length &&
+        criticalCount === 0 &&
+        !fetchError
+    ) {
+        score =
+            Math.max(
+                score,
+                92
+            );
+
+        verdict =
+            "Likely Safe";
+
+        riskLevel =
+            "LOW RISK";
+
+        confidence =
+            "High";
+    }
+
+
+    /* =====================================================
+       REPUTATION STATUS
+    ===================================================== */
+
+    const malwareReputation = {
+        checked: false,
+        available: false,
+        provider: null,
+        malicious: false,
+        message:
+            "No external malware reputation service is configured. SAFNEX NOVA used multi-layer URL, domain and website analysis."
+    };
+
+
+    /* =====================================================
+       VERIFICATION
+    ===================================================== */
+
+    const verification = {
+        domain:
+            getRootDomain(
+                host
+            ),
+
+        hostname:
+            host,
+
+        https:
+            url.protocol ===
+            "https:",
+
+        protocol:
+            url.protocol.replace(
+                ":",
+                ""
+            ),
+
+        ipAddress:
+            isIPAddress(
+                host
+            ),
+
+        punycode:
+            homograph.length > 0,
+
+        suspiciousTLD:
+            tld.suspicious,
+
+        tld:
+            tld.tld,
+
+        typosquatting:
+            typosquatting.length > 0,
+
+        brandImpersonation:
+            impersonation.length > 0,
+
+        phishingSignals:
+            phishing.length,
+
+        redirectDetected:
+            Boolean(
+                fetchResult?.finalUrl &&
+                fetchResult.finalUrl !==
+                rawUrl
+            ),
+
+        websiteInspected:
+            Boolean(
+                fetchResult
+            )
+    };
+
+
+    /* =====================================================
+       FINAL RETURN
+    ===================================================== */
+
     return {
         score,
+
         riskScore:
             100 - score,
+
         verdict,
+
         riskLevel,
+
         confidence,
+
         knownPhishing:
             phishing.length > 0,
+
         indicators,
-        verification: {
-            domain:
-                getRootDomain(host),
-            https:
-                url.protocol ===
-                "https:"
-        },
-        malwareReputation: {
-            checked: false,
-            available: false,
-            message:
-                "No paid malware reputation service is configured."
+
+        verification,
+
+        malwareReputation,
+
+        advancedSignals: {
+            typosquatting:
+                typosquatting,
+
+            brandImpersonation:
+                impersonation,
+
+            homograph:
+                homograph,
+
+            suspiciousTLD:
+                tld,
+
+            hostname:
+                hostnameFindings,
+
+            urlStructure:
+                urlFindings,
+
+            website:
+                websiteFindings,
+
+            brandMismatch,
+
+            redirect:
+                fetchResult?.finalUrl
+                    ? analyzeDestinationChange(
+                        rawUrl,
+                        fetchResult.finalUrl
+                    )
+                    : []
         }
     };
 }
