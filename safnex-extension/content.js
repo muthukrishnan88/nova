@@ -20,6 +20,59 @@ document.documentElement.setAttribute(
 
 
 // ======================================================
+// RECEIVE NAVIGATION WARNING FROM BACKGROUND
+// ======================================================
+
+chrome.runtime.onMessage.addListener(
+  (request, sender, sendResponse) => {
+
+    // --------------------------------------------------
+    // BACKGROUND NAVIGATION WARNING
+    // --------------------------------------------------
+
+    if (request.action === "showWarning") {
+
+      const result =
+        request.result || {};
+
+      const url =
+        result.url ||
+        window.location.href;
+
+
+      console.log(
+        "SAFNEX navigation warning:",
+        url,
+        result
+      );
+
+
+      showSafnexPopup(
+        url,
+        result
+      );
+
+
+      sendResponse({
+        success: true
+      });
+
+
+      return false;
+    }
+
+
+    // --------------------------------------------------
+    // UNKNOWN MESSAGE
+    // --------------------------------------------------
+
+    return false;
+
+  }
+);
+
+
+// ======================================================
 // PROTECT EXTERNAL LINK CLICKS
 // ======================================================
 
@@ -45,7 +98,10 @@ document.addEventListener(
       link.href;
 
 
-    // Ignore special links
+    // --------------------------------------------------
+    // IGNORE SPECIAL LINKS
+    // --------------------------------------------------
+
     if (
       href.startsWith("#") ||
       href.startsWith("javascript:") ||
@@ -58,6 +114,10 @@ document.addEventListener(
 
     }
 
+
+    // --------------------------------------------------
+    // PARSE URL
+    // --------------------------------------------------
 
     let targetURL;
 
@@ -76,7 +136,10 @@ document.addEventListener(
     }
 
 
-    // Don't check links to the current website
+    // --------------------------------------------------
+    // IGNORE CURRENT WEBSITE
+    // --------------------------------------------------
+
     if (
       targetURL.hostname ===
       window.location.hostname
@@ -87,7 +150,24 @@ document.addEventListener(
     }
 
 
-    // Already checking
+    // --------------------------------------------------
+    // IGNORE EXTENSION / INTERNAL URLS
+    // --------------------------------------------------
+
+    if (
+      targetURL.protocol !== "http:" &&
+      targetURL.protocol !== "https:"
+    ) {
+
+      return;
+
+    }
+
+
+    // --------------------------------------------------
+    // ALREADY CHECKING
+    // --------------------------------------------------
+
     if (isCheckingLink) {
 
       return;
@@ -95,13 +175,19 @@ document.addEventListener(
     }
 
 
-    // Stop normal navigation
+    // --------------------------------------------------
+    // STOP NORMAL NAVIGATION
+    // --------------------------------------------------
+
     event.preventDefault();
 
     event.stopPropagation();
-
     event.stopImmediatePropagation();
 
+
+    // --------------------------------------------------
+    // CHECK LINK
+    // --------------------------------------------------
 
     checkLinkBeforeNavigate(
       href
@@ -123,6 +209,10 @@ async function checkLinkBeforeNavigate(
   isCheckingLink = true;
 
 
+  // --------------------------------------------------
+  // SHOW LOADING
+  // --------------------------------------------------
+
   showSafnexPopup(
     url,
     {
@@ -139,6 +229,10 @@ async function checkLinkBeforeNavigate(
       );
 
 
+    // ------------------------------------------------
+    // SUCCESS
+    // ------------------------------------------------
+
     if (
       response &&
       response.success
@@ -150,6 +244,12 @@ async function checkLinkBeforeNavigate(
       );
 
     }
+
+
+    // ------------------------------------------------
+    // ERROR
+    // ------------------------------------------------
+
     else {
 
       showSafnexPopup(
@@ -285,11 +385,17 @@ function visitSite(
   url
 ) {
 
+  // --------------------------------------------------
   // Close SAFNEX popup
+  // --------------------------------------------------
+
   removePopup();
 
 
-  // Open exactly the URL clicked
+  // --------------------------------------------------
+  // Open exactly the URL checked
+  // --------------------------------------------------
+
   window.location.assign(
     url
   );
@@ -326,8 +432,16 @@ function showSafnexPopup(
   result
 ) {
 
+  // --------------------------------------------------
+  // Remove old popup
+  // --------------------------------------------------
+
   removePopup();
 
+
+  // --------------------------------------------------
+  // Create overlay
+  // --------------------------------------------------
 
   const overlay =
     document.createElement(
@@ -343,9 +457,9 @@ function showSafnexPopup(
     "safnex-overlay";
 
 
-  // ====================================================
+  // ==================================================
   // LOADING
-  // ====================================================
+  // ==================================================
 
   if (result.loading) {
 
@@ -387,18 +501,22 @@ function showSafnexPopup(
     `;
 
 
-    document.body.appendChild(
-      overlay
-    );
+    if (document.body) {
+
+      document.body.appendChild(
+        overlay
+      );
+
+    }
 
 
     return;
   }
 
 
-  // ====================================================
+  // ==================================================
   // ERROR
-  // ====================================================
+  // ==================================================
 
   if (result.error) {
 
@@ -489,9 +607,9 @@ function showSafnexPopup(
   }
 
 
-  // ====================================================
+  // ==================================================
   // NORMAL RESULT
-  // ====================================================
+  // ==================================================
 
   else {
 
@@ -505,6 +623,7 @@ function showSafnexPopup(
       Number.isFinite(
         riskScore
       )
+
         ? Math.max(
             0,
             Math.min(
@@ -514,6 +633,7 @@ function showSafnexPopup(
               )
             )
           )
+
         : 0;
 
 
@@ -535,9 +655,15 @@ function showSafnexPopup(
       Array.isArray(
         result.reasons
       )
+
         ? result.reasons
+
         : [];
 
+
+    // ------------------------------------------------
+    // ICON
+    // ------------------------------------------------
 
     let icon =
       "✓";
@@ -549,28 +675,39 @@ function showSafnexPopup(
 
     if (
       riskLevel === "HIGH" ||
-      riskLevel === "CRITICAL"
+      riskLevel === "CRITICAL" ||
+      score >= 75
     ) {
 
-      icon = "⚠️";
+      icon =
+        "⚠️";
+
 
       iconClass =
         "safnex-danger";
 
     }
 
+
     else if (
       riskLevel === "MEDIUM" ||
-      riskLevel === "SUSPICIOUS"
+      riskLevel === "SUSPICIOUS" ||
+      score >= 40
     ) {
 
-      icon = "⚠️";
+      icon =
+        "⚠️";
+
 
       iconClass =
         "safnex-warning";
 
     }
 
+
+    // ------------------------------------------------
+    // DETECTION DETAILS
+    // ------------------------------------------------
 
     const reasonsHTML =
       reasons.length > 0
@@ -587,11 +724,13 @@ function showSafnexPopup(
             ${reasons
               .map(
                 (reason) => `
+
                   <li>
                     ${escapeHtml(
                       String(reason)
                     )}
                   </li>
+
                 `
               )
               .join("")}
@@ -602,6 +741,10 @@ function showSafnexPopup(
 
         : "";
 
+
+    // ------------------------------------------------
+    // POPUP
+    // ------------------------------------------------
 
     overlay.innerHTML = `
 
@@ -707,9 +850,9 @@ function showSafnexPopup(
   }
 
 
-  // ====================================================
+  // ==================================================
   // BUTTON EVENTS
-  // ====================================================
+  // ==================================================
 
   overlay.addEventListener(
     "click",
@@ -730,6 +873,10 @@ function showSafnexPopup(
         button.dataset.action;
 
 
+      // ------------------------------------------------
+      // CLOSE
+      // ------------------------------------------------
+
       if (
         action === "close"
       ) {
@@ -738,6 +885,10 @@ function showSafnexPopup(
 
       }
 
+
+      // ------------------------------------------------
+      // VISIT
+      // ------------------------------------------------
 
       if (
         action === "visit"
@@ -749,6 +900,10 @@ function showSafnexPopup(
 
       }
 
+
+      // ------------------------------------------------
+      // FULL REPORT
+      // ------------------------------------------------
 
       if (
         action === "report"
@@ -764,8 +919,10 @@ function showSafnexPopup(
   );
 
 
-  // Clicking outside popup
-  // closes ONLY popup
+  // ==================================================
+  // CLICK OUTSIDE POPUP
+  // ==================================================
+
   overlay.addEventListener(
     "click",
     function (event) {
@@ -782,9 +939,17 @@ function showSafnexPopup(
   );
 
 
-  document.body.appendChild(
-    overlay
-  );
+  // ==================================================
+  // ADD POPUP TO PAGE
+  // ==================================================
+
+  if (document.body) {
+
+    document.body.appendChild(
+      overlay
+    );
+
+  }
 
 }
 
@@ -852,7 +1017,9 @@ function autoAnalyzeReportPage() {
 
 
   if (!targetURL) {
+
     return;
+
   }
 
 
@@ -893,6 +1060,7 @@ function autoAnalyzeReportPage() {
             );
 
           }
+
 
           return;
 

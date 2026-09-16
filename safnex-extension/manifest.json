@@ -1,19 +1,23 @@
 {
   "manifest_version": 3,
   "name": "SAFNEX NOVA Link Guard",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Protect yourself from suspicious links with SAFNEX NOVA Link Guard.",
+
   "permissions": [
     "activeTab",
     "storage",
     "webNavigation"
   ],
+
   "host_permissions": [
     "<all_urls>"
   ],
+
   "background": {
     "service_worker": "background.js"
   },
+
   "content_scripts": [
     {
       "matches": [
@@ -25,27 +29,35 @@
       "css": [
         "popup.css"
       ],
-      "run_at": "document_end"
+      "run_at": "document_start"
     }
   ],
+
   "action": {
+    "default_title": "SAFNEX NOVA Link Guard",
     "default_popup": "popup.html",
+
     "default_icon": {
       "16": "icon16.png",
       "48": "icon48.png",
       "128": "icon128.png"
     }
   },
+
   "icons": {
     "16": "icon16.png",
     "48": "icon48.png",
     "128": "icon128.png"
   },
+
   "web_accessible_resources": [
     {
       "resources": [
         "popup.css",
-        "icon48.png"
+        "icon16.png",
+        "icon48.png",
+        "icon128.png",
+        "popup-logo.png"
       ],
       "matches": [
         "<all_urls>"

@@ -26,6 +26,182 @@ chrome.runtime.onInstalled.addListener(() => {
 
 
 // ======================================================
+// NAVIGATION CHECK
+// Detects browser navigation, including address-bar URLs
+// ======================================================
+
+chrome.webNavigation.onBeforeNavigate.addListener(
+  async (details) => {
+
+    // Only check the main browser tab
+    if (details.frameId !== 0) {
+      return;
+    }
+
+    const url = details.url;
+
+    // Ignore URLs that SAFNEX should not analyze
+    if (!shouldCheckUrl(url)) {
+      return;
+    }
+
+    try {
+
+      const settings =
+        await chrome.storage.sync.get({
+          enabled: true,
+          autoCheck: true
+        });
+
+      if (
+        settings.enabled === false ||
+        settings.autoCheck === false
+      ) {
+        return;
+      }
+
+
+      console.log(
+        "SAFNEX checking navigation:",
+        url
+      );
+
+
+      const result =
+        await checkLinkSafety(url);
+
+
+      console.log(
+        "SAFNEX navigation result:",
+        result
+      );
+
+
+      // ------------------------------------------------
+      // HIGH-RISK URL
+      // ------------------------------------------------
+
+      if (
+        result.riskLevel === "HIGH" ||
+        result.riskLevel === "CRITICAL" ||
+        result.riskScore >= 75
+      ) {
+
+        // Store result so warning page/content script
+        // can display it.
+        await chrome.storage.session.set({
+
+          safnexLastCheck: {
+            url: url,
+            result: result,
+            timestamp: Date.now()
+          }
+
+        });
+
+
+        // Tell the current tab to show SAFNEX warning.
+        try {
+
+          await chrome.tabs.sendMessage(
+            details.tabId,
+            {
+              action: "showWarning",
+              result: result
+            }
+          );
+
+        }
+        catch (error) {
+
+          console.log(
+            "SAFNEX warning message could not be sent:",
+            error.message
+          );
+
+        }
+
+      }
+
+    }
+    catch (error) {
+
+      console.error(
+        "SAFNEX navigation analysis failed:",
+        error
+      );
+
+    }
+
+  }
+);
+
+
+// ======================================================
+// URL FILTER
+// ======================================================
+
+function shouldCheckUrl(url) {
+
+  if (!url) {
+    return false;
+  }
+
+
+  // Chrome internal pages
+  if (
+    url.startsWith("chrome://") ||
+    url.startsWith("chrome-extension://") ||
+    url.startsWith("edge://") ||
+    url.startsWith("about:") ||
+    url.startsWith("view-source:")
+  ) {
+
+    return false;
+  }
+
+
+  // Chrome Web Store
+  if (
+    url.startsWith(
+      "https://chromewebstore.google.com/"
+    ) ||
+    url.startsWith(
+      "https://chrome.google.com/webstore/"
+    )
+  ) {
+
+    return false;
+  }
+
+
+  // Extension pages
+  if (
+    url.startsWith(
+      chrome.runtime.getURL("")
+    )
+  ) {
+
+    return false;
+  }
+
+
+  // Only HTTP/HTTPS
+  if (
+    !url.startsWith("http://") &&
+    !url.startsWith("https://")
+  ) {
+
+    return false;
+  }
+
+
+  return true;
+
+}
+
+
+// ======================================================
 // MESSAGE HANDLER
 // ======================================================
 
@@ -97,6 +273,33 @@ chrome.runtime.onMessage.addListener(
 
 
     // --------------------------------------------------
+    // GET LAST NAVIGATION CHECK
+    // --------------------------------------------------
+
+    if (
+      request.action ===
+      "getLastCheck"
+    ) {
+
+      chrome.storage.session.get(
+        "safnexLastCheck",
+        (data) => {
+
+          sendResponse({
+            success: true,
+            data:
+              data.safnexLastCheck ||
+              null
+          });
+
+        }
+      );
+
+      return true;
+    }
+
+
+    // --------------------------------------------------
     // UNKNOWN ACTION
     // --------------------------------------------------
 
@@ -106,6 +309,7 @@ chrome.runtime.onMessage.addListener(
     });
 
     return false;
+
   }
 );
 
@@ -191,6 +395,7 @@ async function checkLinkSafety(url) {
     clearTimeout(timeout);
 
   }
+
 }
 
 
@@ -217,7 +422,9 @@ function normalizeResult(
 
 
   if (!Number.isFinite(riskScore)) {
+
     riskScore = 0;
+
   }
 
 
