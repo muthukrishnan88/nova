@@ -510,7 +510,7 @@ scanLoading.classList.add("show");
 setTimeout(()=>decodeQR(currentObjectUrl,file.name),300);
 }
 
-async function decodeQR(imageSource,fileName){
+function decodeQR(imageSource,fileName){
 if(!window.jsQR){
 scanLoading.classList.remove("show");
 showDecoderError();
@@ -519,7 +519,7 @@ return;
 
 const image=new Image();
 
-image.onload=async()=>{
+image.onload=()=>{
 try{
 const canvas=document.createElement("canvas");
 const context=canvas.getContext("2d",{willReadFrequently:true});
@@ -528,12 +528,6 @@ if(!context){scanLoading.classList.remove("show");showNotQR();return;}
 const maxSize=1800;
 let width=image.naturalWidth;
 let height=image.naturalHeight;
-
-if(width<50||height<50){
-scanLoading.classList.remove("show");
-showNotQR();
-return;
-}
 
 if(width>maxSize||height>maxSize){
 const scale=Math.min(maxSize/width,maxSize/height);
@@ -545,37 +539,11 @@ canvas.width=width;
 canvas.height=height;
 context.drawImage(image,0,0,width,height);
 
-// Multi-pass decoding strategy
-let code=null;
-
-// Pass 1: Standard decode with inversion
 const imageData=context.getImageData(0,0,width,height);
-code=window.jsQR(
+const code=window.jsQR(
 imageData.data,imageData.width,imageData.height,
 {inversionAttempts:"attemptBoth"}
 );
-
-// Pass 2: Contrast enhancement if first pass fails
-if(!code||!String(code.data||"").trim()){
-context.filter="contrast(150%) brightness(110%)";
-context.drawImage(canvas,0,0);
-const enhancedData=context.getImageData(0,0,width,height);
-code=window.jsQR(
-enhancedData.data,enhancedData.width,enhancedData.height,
-{inversionAttempts:"attemptBoth"}
-);
-}
-
-// Pass 3: Inverted image if still not found
-if(!code||!String(code.data||"").trim()){
-context.filter="invert(100%)";
-context.drawImage(canvas,0,0);
-const invertedData=context.getImageData(0,0,width,height);
-code=window.jsQR(
-invertedData.data,invertedData.width,invertedData.height,
-{inversionAttempts:"attemptBoth"}
-);
-}
 
 scanLoading.classList.remove("show");
 
@@ -584,23 +552,9 @@ showNotQR();
 return;
 }
 
-const rawData=String(code.data).trim();
-
-// Never guess - only show what was actually decoded
-if(!rawData){
-showNotQR();
-return;
-}
-
-decodedContent=rawData;
-detectedType=detectQRType(rawData);
-
-// For URLs, check security before showing result
-if(detectedType==="URL"){
-await analyzeAndShowResult(rawData,detectedType,fileName);
-}else{
-showResult(rawData,detectedType,fileName);
-}
+decodedContent=String(code.data).trim();
+detectedType=detectQRType(decodedContent);
+showResult(decodedContent,detectedType,fileName);
 
 }catch(error){
 console.error("QR decode error:",error);
@@ -620,78 +574,27 @@ image.src=imageSource;
 function detectQRType(data){
 const value=String(data||"").trim();
 
-if(!value)return"UNKNOWN";
-
-// Strict URL detection
-if(/^https?:\/\//i.test(value)){
-try{
-new URL(value);
-return"URL";
-}catch{
-// Looks like URL but invalid - treat as text
-}
-}
-
-// Phone number - must have tel: prefix or valid international format
-if(/^tel:/i.test(value))return"PHONE";
-if(/^\+[1-9][0-9]{7,14}$/.test(value))return"PHONE";
-
-// Email - must have mailto: or valid email structure
-if(/^mailto:/i.test(value))return"EMAIL";
-if(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value))return"EMAIL";
-
-// Location - geo: prefix required
+if(/^https?:\/\/\S+/i.test(value))return"URL";
+if(/^tel:/i.test(value)||/^\+?[0-9][0-9\s().-]{6,}$/.test(value))return"PHONE";
+if(/^mailto:/i.test(value)||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))return"EMAIL";
 if(/^geo:/i.test(value))return"LOCATION";
-
-// Contact - vCard format
 if(/^BEGIN:VCARD/i.test(value))return"CONTACT";
-
-// WiFi - must have WIFI: prefix
 if(/^WIFI:/i.test(value))return"WIFI";
-
-// UPI Payment - strict UPI structure
-if(/^upi:\/\/pay\?/i.test(value))return"UPI_PAYMENT";
-if(/^upi:/i.test(value))return"UPI_PAYMENT";
-
-// SMS - must have sms: or SMSTO: prefix
+if(/^upi:/i.test(value)||/^upi:\/\/pay/i.test(value)||/(?:^|[?&])(pa|pn|am|mc)=/i.test(value))return"UPI / PAYMENT";
 if(/^sms:/i.test(value)||/^SMSTO:/i.test(value))return"SMS";
-
-// Plain text if not classified
 if(value.length>0)return"TEXT";
-
 return"UNKNOWN";
 }
 
-function showResult(data,type,fileName,securityData=null){
+function showResult(data,type,fileName){
 empty.style.display="none";
 notQr.classList.remove("show");
 results.classList.add("show");
 
-// XSS Protection - use textContent not innerHTML
 typeBadge.textContent=type;
 contentValue.textContent=data;
 infoType.textContent=type;
-
-// Show security status for URLs
-if(type==="URL"&&securityData){
-const score=securityData.score;
-const verdict=securityData.verdict||"Unknown";
-infoStatus.textContent=`SECURITY: ${verdict.toUpperCase()} (${score}/100)`;
-if(score<40){
-infoStatus.style.color="#e64d61";
-}else if(score<70){
-infoStatus.style.color="#ed9b28";
-}else{
-infoStatus.style.color="#13a673";
-}
-}else if(type==="URL"){
-infoStatus.textContent="SECURITY: CHECKING...";
-infoStatus.style.color="#71809a";
-}else{
 infoStatus.textContent="QR CODE DETECTED";
-infoStatus.style.color="";
-}
-
 techType.textContent=type;
 techImage.textContent=fileName||"QR image";
 }
@@ -703,14 +606,13 @@ populateFullReport(decodedContent,detectedType);
 });
 
 function populateFullReport(data,type){
-// XSS Protection - use textContent
 reportTypeName.textContent=getFriendlyType(type);
 reportContentBox.textContent=data||"No decoded content.";
 reportDataType.textContent=type;
 
 const icons={
 "URL":"🔗","PHONE":"📞","EMAIL":"✉","LOCATION":"📍",
-"CONTACT":"👤","WIFI":"📶","UPI_PAYMENT":"💳","UPI / PAYMENT":"💳","SMS":"💬",
+"CONTACT":"👤","WIFI":"📶","UPI / PAYMENT":"💳","SMS":"💬",
 "TEXT":"📝","UNKNOWN":"▣"
 };
 reportTypeIcon.textContent=icons[type]||"▣";
@@ -769,12 +671,7 @@ window.location.href="mailto:"+email;
 reportPrimaryBtn.textContent="VIEW LOCATION →";
 reportSecurityAction.textContent="Review location";
 reportPrimaryBtn.onclick=()=>{
-// Safety check before opening
-if(isSafeScheme(data)){
 window.open(data,"_blank","noopener,noreferrer");
-}else{
-alert("Unsafe URL scheme detected. Only HTTP/HTTPS links can be opened.");
-}
 };
 }else if(type==="CONTACT"){
 reportPrimaryBtn.textContent="VIEW CONTACT DATA";
@@ -789,18 +686,10 @@ reportNotice.innerHTML="<strong>Sensitive information detected:</strong> This QR
 reportPrimaryBtn.onclick=()=>{
 reportContentBox.scrollIntoView({behavior:"smooth"});
 };
-}else if(type==="UPI_PAYMENT"||type==="UPI / PAYMENT"){
+}else if(type==="UPI / PAYMENT"){
 reportPrimaryBtn.textContent="VIEW PAYMENT DATA";
 reportSecurityAction.textContent="Review payment details";
-reportNotice.innerHTML="<strong>Payment QR detected:</strong> Review the payment address, recipient and amount carefully before making any payment. SAFNEX NOVA does not automatically initiate payments.";
-
-// Parse UPI data
-const upiInfo=parseUPIData(data);
-if(upiInfo){
-const upiDetails=`Payee: ${upiInfo.payee||'Not specified'}\\nName: ${upiInfo.name||'Not specified'}\\nAmount: ${upiInfo.amount||'Not specified'}`;
-reportNotice.innerHTML+=`<br><br><strong>Extracted info:</strong><br>${upiDetails.replace(/\\n/g,'<br>')}`;
-}
-
+reportNotice.innerHTML="<strong>Payment QR detected:</strong> Review the payment address, recipient and amount carefully before making any payment.";
 reportPrimaryBtn.onclick=()=>{
 reportContentBox.scrollIntoView({behavior:"smooth"});
 };
@@ -824,7 +713,7 @@ function getFriendlyType(type){
 const names={
 "URL":"Website / URL","PHONE":"Phone Number","EMAIL":"Email Address",
 "LOCATION":"Location","CONTACT":"Contact / vCard","WIFI":"Wi-Fi Configuration",
-"UPI_PAYMENT":"Payment / UPI QR","UPI / PAYMENT":"Payment / UPI QR","SMS":"SMS Message","TEXT":"Plain Text",
+"UPI / PAYMENT":"Payment / UPI QR","SMS":"SMS Message","TEXT":"Plain Text",
 "UNKNOWN":"Unknown QR Data"
 };
 return names[type]||"Unknown QR Data";
@@ -976,89 +865,8 @@ alert('Failed to download QR code.');
 }
 });
 
-// URL SECURITY ANALYSIS
-let urlSecurityCache=new Map();
-
-async function analyzeAndShowResult(url,type,fileName){
-try{
-// Check cache first
-if(urlSecurityCache.has(url)){
-const cached=urlSecurityCache.get(url);
-showResult(url,type,fileName,cached);
-return;
-}
-
-// Call existing /api/analyze endpoint
-const response=await fetch('/api/analyze',{
-method:'POST',
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({url:url})
-});
-
-if(!response.ok){
-// If API fails, show without security data
-showResult(url,type,fileName,null);
-return;
-}
-
-const data=await response.json();
-
-// Extract security info
-const securityData={
-score:data.security?.score??null,
-verdict:data.security?.verdict??"Unknown",
-riskLevel:data.security?.riskLevel??"UNKNOWN",
-indicators:data.security?.indicators??[],
-confidence:data.security?.confidence??"Low"
-};
-
-urlSecurityCache.set(url,securityData);
-showResult(url,type,fileName,securityData);
-
-}catch(error){
-console.error("URL security analysis error:",error);
-// Show without security data on error
-showResult(url,type,fileName,null);
-}
-}
-
-// XSS PROTECTION - SAFE CONTENT DISPLAY
-function escapeHTML(unsafe){
-const div=document.createElement('div');
-div.textContent=unsafe;
-return div.innerHTML;
-}
-
-function isSafeScheme(url){
-try{
-const parsed=new URL(url);
-return ['http:','https:'].includes(parsed.protocol.toLowerCase());
-}catch{
-return false;
-}
-}
-
-// UPI PAYMENT PARSER
-function parseUPIData(data){
-try{
-const upiRegex=/pa=([^&]+)|pn=([^&]+)|am=([^&]+)/g;
-let match;
-const info={payee:null,name:null,amount:null};
-
-while((match=upiRegex.exec(data))!==null){
-if(match[1])info.payee=decodeURIComponent(match[1]);
-if(match[2])info.name=decodeURIComponent(match[2]);
-if(match[3])info.amount='₹'+decodeURIComponent(match[3]);
-}
-
-return info.payee||info.name||info.amount?info:null;
-}catch{
-return null;
-}
-}
-
 // AUTO-LOAD FROM HOME.HTML VIA SESSIONSTORAGE
-(async function(){
+(function(){
 try{
 const stored=sessionStorage.getItem("safnexQrResult");
 if(!stored)return;
@@ -1066,10 +874,6 @@ sessionStorage.removeItem("safnexQrResult");
 
 const qrData=JSON.parse(stored);
 if(!qrData||!qrData.data)return;
-
-// Validate data - never trust sessionStorage blindly
-const data=String(qrData.data||"").trim();
-if(!data)return;
 
 // Switch to scan tab
 tabs.forEach(t=>t.classList.remove('active'));
@@ -1085,23 +889,17 @@ previewName.textContent="QR Code from Home";
 previewSize.textContent="Analyzed";
 }
 
-// Detect type and show results
-decodedContent=data;
-detectedType=detectQRType(data);
-
-// For URLs, analyze security async
-if(detectedType==="URL"){
-await analyzeAndShowResult(data,detectedType,"QR from Home");
-}else{
-showResult(data,detectedType,"QR from Home");
-}
+// Show results immediately
+decodedContent=qrData.data;
+detectedType=detectQRType(qrData.data);
+showResult(qrData.data,detectedType,"QR from Home");
 
 // Auto-open full report view
 setTimeout(()=>{
 results.classList.remove("show");
 reportView.classList.add("show");
-populateFullReport(data,detectedType);
-},200);
+populateFullReport(qrData.data,detectedType);
+},100);
 
 }catch(e){
 console.warn("QR auto-load failed:",e);
